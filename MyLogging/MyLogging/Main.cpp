@@ -1,21 +1,18 @@
 #include<iostream>
 #include "LogManager.h"
-#include "LoggingInterface.h"
-
-using namespace std;
 
 int main()
 {
-    LogManager* manager = new LogManager();
+    logging::LogManager* manager = new logging::LogManager();
     manager->IsEnabled(true);
 
-    manager->SetInterface(new FileLogging());
+    manager->Initialize(logging::kFile);
     manager->Logging();
 
-    manager->SetInterface(new DebugLogging());
+    manager->Initialize(logging::kDebug);
     manager->Logging();
 
-    manager->SetInterface(new NetworkLogging());
+    manager->Initialize(logging::kNetwork);
     manager->Logging();
 
     return 0;

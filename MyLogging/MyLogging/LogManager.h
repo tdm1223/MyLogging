@@ -7,41 +7,64 @@
 
 using namespace std;
 
-class LogManager
+namespace logging
 {
-public:
-    LogManager() : loggingInterface(0), isEnabled(false) {}
-    ~LogManager()
+    enum logType
     {
-        if (loggingInterface)
+        kFile,
+        kDebug,
+        kNetwork
+    };
+
+    class LogManager
+    {
+    public:
+        LogManager() : loggingInterface(0), isEnabled(false) {}
+        ~LogManager()
         {
-            delete loggingInterface;
+            if (loggingInterface)
+            {
+                delete loggingInterface;
+            }
         }
-    }
-    void SetInterface(LoggingInterface* _interface)
-    {
-        if (loggingInterface)
+        void Initialize(logType type)
         {
-            delete loggingInterface;
+            isEnabled = true;
+            if (loggingInterface)
+            {
+                delete loggingInterface;
+            }
+
+            switch (type)
+            {
+            case kFile:
+                loggingInterface = new FileLogging();
+                break;
+            case kDebug:
+                loggingInterface = new DebugLogging();
+                break;
+            case kNetwork:
+                loggingInterface = new NetworkLogging();
+                break;
+            }
         }
-        loggingInterface = _interface;
-    }
 
-    void IsEnabled(bool isEnabled)
-    {
-        this->isEnabled = isEnabled;
-    }
-
-    void Logging()
-    {
-        if (isEnabled)
+        void IsEnabled(bool isEnabled)
         {
-            loggingInterface->Logging();
+            this->isEnabled = isEnabled;
         }
-    }
 
-private:
-    LoggingInterface* loggingInterface;
-    bool isEnabled;
-};
+        void Logging()
+        {
+            if (isEnabled)
+            {
+                loggingInterface->Logging();
+            }
+        }
 
+    private:
+        LoggingInterface* loggingInterface;
+        bool isEnabled;
+    };
+
+}
