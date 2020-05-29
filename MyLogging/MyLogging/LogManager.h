@@ -4,6 +4,7 @@
 #include "FileLogging.h"
 #include "NetworkLogging.h"
 #include "DebugLogging.h"
+#include<vector>
 
 using namespace std;
 
@@ -11,60 +12,26 @@ namespace logging
 {
     enum logType
     {
-        kFile,
-        kDebug,
-        kNetwork
+        kFile = 1,
+        kDebug = 2,
+        kNetwork = 4
     };
 
     class LogManager
     {
     public:
         LogManager() : loggingInterface(0), isEnabled(false) {}
-        ~LogManager()
-        {
-            if (loggingInterface)
-            {
-                delete loggingInterface;
-            }
-        }
-        void Initialize(logType type)
-        {
-            isEnabled = true;
-            if (loggingInterface)
-            {
-                delete loggingInterface;
-            }
-
-            switch (type)
-            {
-            case kFile:
-                loggingInterface = new FileLogging();
-                break;
-            case kDebug:
-                loggingInterface = new DebugLogging();
-                break;
-            case kNetwork:
-                loggingInterface = new NetworkLogging();
-                break;
-            }
-        }
-
-        void IsEnabled(bool isEnabled)
-        {
-            this->isEnabled = isEnabled;
-        }
-
-        void Logging()
-        {
-            if (isEnabled)
-            {
-                loggingInterface->Logging();
-            }
-        }
+        LogManager(logType type);
+        ~LogManager();
+        void Initialize(logType type);
+        void IsEnabled(bool isEnabled);
+        void Logging();
 
     private:
         LoggingInterface* loggingInterface;
         bool isEnabled;
     };
 
+    LogManager GetModule(logType type);
+    std::vector<LogManager> GetLoggingList();
 }
