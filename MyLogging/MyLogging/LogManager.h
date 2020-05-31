@@ -29,6 +29,8 @@ public:
     std::vector<LoggingInterface*>& GetLoggingList();
     void Disable(logType type);
 
+    void Enable(logType type);
+
 private:
     std::vector<LoggingInterface*> loggingList_;
 };

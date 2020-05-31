@@ -13,7 +13,7 @@ public:
     void SetLoggingType(int loggingType);
 
 private:
-    bool isEnabled_;
+    bool isEnabled_ = true;
     int loggingType_;
 };
 
