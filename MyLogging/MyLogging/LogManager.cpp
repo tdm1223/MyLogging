@@ -1,54 +1,31 @@
 #include "LogManager.h"
 
-logging::LogManager::LogManager(logType type)
+
+LogManager::LogManager()
 {
-    Initialize(type);
 }
 
-logging::LogManager::~LogManager()
+LogManager::~LogManager()
 {
-    if (loggingInterface)
-    {
-        delete loggingInterface;
-    }
 }
 
-void logging::LogManager::Initialize(logType type)
+void LogManager::AddLogType(logType type)
 {
-    isEnabled = true;
-    if (loggingInterface)
-    {
-        delete loggingInterface;
-    }
-
+    LoggingInterface* tmp;
     switch (type)
     {
-    case kFile:
-        loggingInterface = new FileLogging();
+    case logType::kFile:
+        tmp = new FileLogging();
         break;
-    case kDebug:
-        loggingInterface = new DebugLogging();
+    case logType::kDebug:
+        tmp = new DebugLogging();
         break;
-    case kNetwork:
-        loggingInterface = new NetworkLogging();
+    case logType::kNetwork:
+        tmp = new NetworkLogging();
         break;
     }
 }
 
-void logging::LogManager::IsEnabled(bool isEnabled)
+void LogManager::Logging()
 {
-    this->isEnabled = isEnabled;
-}
-
-void logging::LogManager::Logging()
-{
-    if (isEnabled)
-    {
-        loggingInterface->Logging();
-    }
-}
-
-logging::LogManager logging::GetModule(logType type)
-{
-    return LogManager(type);
 }

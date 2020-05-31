@@ -8,6 +8,6 @@ public:
     int GetLoggingType() override;
 
 private:
-    const int loggingType;
+    const int loggingType = 2;
 };
 

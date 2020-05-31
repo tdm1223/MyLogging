@@ -8,30 +8,23 @@
 
 using namespace std;
 
-namespace logging
+
+enum class logType
 {
-    enum logType
-    {
-        kFile = 1,
-        kDebug = 2,
-        kNetwork = 4
-    };
+    kFile = 1,
+    kDebug = 2,
+    kNetwork = 4
+};
 
-    class LogManager
-    {
-    public:
-        LogManager() : loggingInterface(0), isEnabled(false) {}
-        LogManager(logType type);
-        ~LogManager();
-        void Initialize(logType type);
-        void IsEnabled(bool isEnabled);
-        void Logging();
+class LogManager
+{
+public:
+    LogManager();
+    ~LogManager();
+    void AddLogType(logType type);
+    void Logging();
 
-    private:
-        LoggingInterface* loggingInterface;
-        bool isEnabled;
-    };
+private:
+    std::vector<LoggingInterface*> loggingList_;
+};
 
-    LogManager GetModule(logType type);
-    std::vector<LogManager> GetLoggingList();
-}

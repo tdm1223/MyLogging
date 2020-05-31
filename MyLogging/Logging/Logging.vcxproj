@@ -138,17 +138,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\MyLogging\DebugLogging.cpp" />
-    <ClCompile Include="..\MyLogging\FileLogging.cpp" />
-    <ClCompile Include="..\MyLogging\NetworkLogging.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\MyLogging\DebugLogging.h" />
-    <ClInclude Include="..\MyLogging\FileLogging.h" />
-    <ClInclude Include="..\MyLogging\LoggingInterface.h" />
-    <ClInclude Include="..\MyLogging\NetworkLogging.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
