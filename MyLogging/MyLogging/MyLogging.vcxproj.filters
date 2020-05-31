@@ -13,39 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="헤더 파일\로깅">
+      <UniqueIdentifier>{e8ed1e43-847e-41f1-9ce2-962e23b8a1f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\로깅">
+      <UniqueIdentifier>{26a0e82c-2625-49a2-a91f-8b70a694c1d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\매니저">
+      <UniqueIdentifier>{5e0f133e-db38-465b-b2c0-3f56d8925e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\매니저">
+      <UniqueIdentifier>{2129cb52-0eec-4dd0-b157-c0cf7091c801}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="LogManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="DebugLogging.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\로깅</Filter>
     </ClCompile>
     <ClCompile Include="FileLogging.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\로깅</Filter>
     </ClCompile>
     <ClCompile Include="NetworkLogging.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\로깅</Filter>
+    </ClCompile>
+    <ClCompile Include="LogManager.cpp">
+      <Filter>소스 파일\매니저</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LogManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="DebugLogging.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="FileLogging.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="LoggingInterface.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="NetworkLogging.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\로깅</Filter>
+    </ClInclude>
+    <ClInclude Include="LogManager.h">
+      <Filter>헤더 파일\매니저</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
-#include "LogManager.h"
-
+#include"LogManager.h"
 
 LogManager::LogManager()
 {
@@ -11,21 +10,27 @@ LogManager::~LogManager()
 
 void LogManager::AddLogType(logType type)
 {
-    LoggingInterface* tmp;
+    LoggingInterface* loggingInterface;
     switch (type)
     {
     case logType::kFile:
-        tmp = new FileLogging();
+        loggingInterface = new FileLogging();
         break;
     case logType::kDebug:
-        tmp = new DebugLogging();
+        loggingInterface = new DebugLogging();
         break;
     case logType::kNetwork:
-        tmp = new NetworkLogging();
+        loggingInterface = new NetworkLogging();
         break;
     }
+
 }
 
 void LogManager::Logging()
 {
+}
+
+std::vector<LoggingInterface*> LogManager::GetLoggingList()
+{
+    return loggingList_;
 }

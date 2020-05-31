@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __DEBUG_LOGGING_H__
+#define __DEBUG_LOGGING_H__
+
 #include "LoggingInterface.h"
 
 class DebugLogging : public LoggingInterface
@@ -11,3 +13,4 @@ private:
     const int loggingType = 2;
 };
 
+#endif // !__DEBUG_LOGGING_H__

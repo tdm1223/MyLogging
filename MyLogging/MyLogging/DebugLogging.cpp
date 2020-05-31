@@ -1,4 +1,4 @@
-﻿#include "DebugLogging.h"
+﻿#include"DebugLogging.h"
 
 void DebugLogging::Logging()
 {
