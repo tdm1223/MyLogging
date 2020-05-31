@@ -4,8 +4,8 @@
 class NetworkLogging : public LoggingInterface
 {
 public:
-    void Logging() override
-    {
-        std::cout << "네트워크 로깅" << std::endl;
-    }
+    void Logging() override;
+    int GetLoggingType() override;
+private:
+    const int loggingType = 4;
 };

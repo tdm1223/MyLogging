@@ -4,9 +4,10 @@
 class DebugLogging : public LoggingInterface
 {
 public:
-    void Logging() override
-    {
-        std::cout << "µð¹ö±× ·Î±ë" << std::endl;
-    }
+    void Logging() override;
+    int GetLoggingType() override;
+
+private:
+    const int loggingType;
 };
 

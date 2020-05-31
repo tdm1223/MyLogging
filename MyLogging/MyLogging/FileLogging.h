@@ -4,8 +4,9 @@
 class FileLogging : public LoggingInterface
 {
 public:
-    void Logging() override
-    {
-        std::cout << "ÆÄÀÏ ·Î±ë" << std::endl;
-    }
+    void Logging() override;
+    int GetLoggingType() override;
+
+private:
+    const int loggingType = 1;
 };
