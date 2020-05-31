@@ -6,11 +6,8 @@
 class NetworkLogging : public LoggingInterface
 {
 public:
+    NetworkLogging();
     void Logging() override;
-    int GetLoggingType() override;
-
-private:
-    const int loggingType = 4;
 };
 
 #endif // !__NETWORK_LOGGING_H__

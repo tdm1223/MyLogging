@@ -24,8 +24,10 @@ public:
     LogManager();
     ~LogManager();
     void AddLogType(logType type);
+    void DeleteLogType(logType type);
     void Logging();
-    std::vector<LoggingInterface*> GetLoggingList();
+    std::vector<LoggingInterface*>& GetLoggingList();
+    void Disable(logType type);
 
 private:
     std::vector<LoggingInterface*> loggingList_;

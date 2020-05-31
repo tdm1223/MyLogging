@@ -42,6 +42,9 @@
     <ClCompile Include="LogManager.cpp">
       <Filter>소스 파일\매니저</Filter>
     </ClCompile>
+    <ClCompile Include="LoggingInterface.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugLogging.h">

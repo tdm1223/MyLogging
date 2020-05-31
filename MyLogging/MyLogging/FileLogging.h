@@ -6,11 +6,8 @@
 class FileLogging : public LoggingInterface
 {
 public:
+    FileLogging();
     void Logging() override;
-    int GetLoggingType() override;
-
-private:
-    const int loggingType = 1;
 };
 
 #endif // !__FILE_LOGGING_H__

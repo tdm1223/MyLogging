@@ -7,7 +7,14 @@ class LoggingInterface
 {
 public:
     virtual void Logging() = 0;
-    virtual int GetLoggingType() = 0;
+    bool GetEnabled();
+    void SetEnabled(bool enabled);
+    int GetLoggingType();
+    void SetLoggingType(int loggingType);
+
+private:
+    bool isEnabled_;
+    int loggingType_;
 };
 
 #endif // !__LOGGING_INTERFACE_H__
