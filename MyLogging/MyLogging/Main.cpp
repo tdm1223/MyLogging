@@ -3,12 +3,15 @@
 
 int main()
 {
-    LogManager* manager = new LogManager();
-    manager->AddLogType(logType::kDebug);
-    manager->Logging();
+    LogManager* instance;
+    instance = LogManager::GetInstance();
+    instance->AddLogType(logType::kDebug);
+    instance->Logging();
     std::cout << "=================================" << endl;
    
-    manager->DeleteLogType(logType::kDebug);
-    manager->Logging();
+    instance->DeleteLogType(logType::kDebug);
+    instance->AddLogType(logType::kFile);
+    instance->AddLogType(logType::kNetwork);
+    instance->Logging();
     return 0;
 }

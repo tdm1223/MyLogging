@@ -14,7 +14,7 @@ public:
 
 private:
     bool isEnabled_ = true;
-    int loggingType_;
+    int loggingType_ = 0;
 };
 
 #endif // !__LOGGING_INTERFACE_H__

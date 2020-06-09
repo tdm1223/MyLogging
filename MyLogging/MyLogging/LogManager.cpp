@@ -1,7 +1,18 @@
 #include"LogManager.h"
 
+LogManager* LogManager::instance = nullptr;
+
 LogManager::LogManager()
 {
+}
+
+LogManager* LogManager::GetInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new LogManager();
+    }
+    return instance;
 }
 
 LogManager::~LogManager()
