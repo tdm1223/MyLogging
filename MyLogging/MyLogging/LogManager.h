@@ -6,6 +6,7 @@
 #include"NetworkLogging.h"
 #include"DebugLogging.h"
 #include<vector>
+#include<mutex>
 
 using namespace std;
 
@@ -33,8 +34,9 @@ public:
 
 private:
     LogManager();
-    static LogManager* instance;
+    static LogManager* instance_;
     std::vector<LoggingInterface*> loggingList_;
+    std::mutex mutex_;
 };
 
 

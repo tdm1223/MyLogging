@@ -1,6 +1,6 @@
 #include"LogManager.h"
 
-LogManager* LogManager::instance = nullptr;
+LogManager* LogManager::instance_ = nullptr;
 
 LogManager::LogManager()
 {
@@ -8,11 +8,11 @@ LogManager::LogManager()
 
 LogManager* LogManager::GetInstance()
 {
-    if (instance == nullptr)
+    if (instance_ == nullptr)
     {
-        instance = new LogManager();
+        instance_ = new LogManager();
     }
-    return instance;
+    return instance_;
 }
 
 LogManager::~LogManager()
@@ -26,6 +26,7 @@ LogManager::~LogManager()
 
 void LogManager::AddLogType(logType type)
 {
+    mutex_.lock();
     LoggingInterface* loggingInterface;
     switch (type)
     {
@@ -41,10 +42,12 @@ void LogManager::AddLogType(logType type)
     }
     std::vector<LoggingInterface*>& loggingList = GetLoggingList();
     loggingList.push_back(loggingInterface);
+    mutex_.unlock();
 }
 
 void LogManager::DeleteLogType(logType type)
 {
+    mutex_.lock();
     std::vector<LoggingInterface*>& loggingList = GetLoggingList();
     auto iter = loggingList.begin();
     for (auto log : loggingList)
@@ -58,10 +61,12 @@ void LogManager::DeleteLogType(logType type)
             iter++;
         }
     }
+    mutex_.unlock();
 }
 
 void LogManager::Logging()
 {
+    mutex_.lock();
     std::vector<LoggingInterface*>& loggingList = GetLoggingList();
     for (auto log : loggingList)
     {
@@ -70,6 +75,7 @@ void LogManager::Logging()
             log->Logging();
         }
     }
+    mutex_.unlock();
 }
 
 std::vector<LoggingInterface*>& LogManager::GetLoggingList()
