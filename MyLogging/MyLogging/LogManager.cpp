@@ -67,12 +67,11 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
     CopyMemory(logInfoLevel_, logConfig.logInfoLevelByTypes, MAX_LOG_TYPE * sizeof(INT));
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
-
+    
     // 파일로그를 설정했다면
     if (logInfoLevel_[kFile] != kNone)
     {
-        LoggingInterface* tmp = new FileLogging(logConfig);
-        loggingList_.push_back(tmp);
+        loggingList_.push_back(new FileLogging(logConfig));
     }
 
     loggingList_.push_back(new ConsoleLogging(logConfig));
@@ -115,7 +114,7 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     
     for (auto log : loggingList_)
     {
-        log->Logging(outputString_, localTime);
+        log->Logging(outputString_, localTime, logInfo);
     }
 
     //if (logLevelByTypes[kDebugView] <= logLevel)
