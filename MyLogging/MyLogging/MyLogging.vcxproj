@@ -139,7 +139,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DebugLogging.cpp" />
-    <ClCompile Include="FileLogging.cpp" />
     <ClCompile Include="LoggingInterface.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -149,7 +148,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugLogging.h" />
-    <ClInclude Include="FileLogging.h" />
     <ClInclude Include="LoggingInterface.h" />
     <ClInclude Include="LogManager.h" />
     <ClInclude Include="NetworkLogging.h" />

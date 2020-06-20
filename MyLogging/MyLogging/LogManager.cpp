@@ -48,13 +48,10 @@ void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ..
 LogManagerImpl::LogManagerImpl()
 {
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
-    ZeroMemory(logFileName_, MAX_PATH);
     fileLogType_ = FileLogType::kFileNone;
     windowHandle_ = NULL;
-    logFileHandle_ = NULL;
     msgBufferIndex_ = 0;
     fileMaxSize_ = 0;
-    fileCount_ = 0;
     isInit_ = FALSE;
 }
 
@@ -69,33 +66,23 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
     CloseAllLog();
-    CHAR strtime[100];
     CopyMemory(logInfoLevel_, logConfig.logInfoLevelByTypes, MAX_LOG_TYPE * sizeof(INT));
-    time_t curtime;
-    struct tm localTime;
-    curtime = time(NULL);
-    localtime_s(&localTime, &curtime);
-    strftime(strtime, 100, "%Y%m%d", &localTime);
-    CreateDirectory(L"./LOG", NULL);
+
     logConfig_ = logConfig;
-    _snprintf_s(logFileName_, MAX_PATH, "%s_%s", logConfig.logFileName, strtime);
     fileMaxSize_ = logConfig.fileMaxSize;
     windowHandle_ = logConfig.hWnd;
-    BOOL isError = FALSE;
 
     // 파일로그를 설정했다면
     if (logInfoLevel_[kFile] != kNone)
     {
-        isError = InitFile(localTime);
+        LoggingInterface* tmp = new FileLogging(logConfig);
+        loggingList_.push_back(tmp);
     }
 
-    //// 에러 발생
-    if (isError == FALSE)
+    for (auto logging : loggingList_)
     {
-        CloseAllLog();
-        return FALSE;
+        logging->Init();
     }
-
     isInit_ = TRUE;
     CreateThread(logConfig.processTick);
     Run();
@@ -128,12 +115,9 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     
     for (auto log : loggingList_)
     {
-        log->Logging();
+        log->Logging(outputString_, localTime);
     }
-    if (logLevelByTypes[kFile] <= logLevel)
-    {
-        OutputFile(outputString_, localTime);
-    }
+
     if (logLevelByTypes[kConsole] <= logLevel)
     {
         OutputConsole(logInfo, outputString_);
@@ -152,17 +136,17 @@ void LogManagerImpl::CloseAllLog()
     OnProcess();
 
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
-    ZeroMemory(logFileName_, MAX_PATH);
+    //ZeroMemory(logFileName_, MAX_PATH);
     fileLogType_ = FileLogType::kFileNone;
     windowHandle_ = NULL;
     msgBufferIndex_ = 0;
 
     //파일 로그를 끝낸다.
-    if (logFileHandle_)
-    {
-        CloseHandle(logFileHandle_);
-        logFileHandle_ = NULL;
-    }
+    //if (logFileHandle_)
+    //{
+    //    CloseHandle(logFileHandle_);
+    //    logFileHandle_ = NULL;
+    //}
 
     //쓰레드 종료
     Stop();
@@ -226,45 +210,14 @@ void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)
     logQueue_.Push(logMsg);
 }
 
-CHAR* LogManagerImpl::GetLogFileName()
-{
-    return logFileName_;
-}
+
 
 void LogManagerImpl::SetLogInfoTypes(LogType logType, LogInfoType logInfoType)
 {
     logInfoLevel_[logType] = logInfoType;
 }
 
-void LogManagerImpl::OutputFile(CHAR* outputString, tm localTime)
-{
-    if (logFileHandle_ == nullptr)
-    {
-        return;
-    }
 
-    DWORD dwWrittenBytes = 0;
-    UINT32 dwSize = 0;
-    dwSize = GetFileSize(logFileHandle_, NULL);
-    // 파일 용량이 지정한 크기를 초과헀거나 날짜가 다르다면 새로 만든다.
-    if (dwSize > MAX_LOGFILE_SIZE || localTime.tm_mday != logFileLocalTime_.tm_mday)
-    {
-        CHAR strtime[100];
-        time_t curtime;
-        struct tm loctime;
-        curtime = time(NULL);
-        localtime_s(&loctime, &curtime);
-        strftime(strtime, 100, "%Y%m%d_01", &loctime);
-        _snprintf_s(logFileName_, MAX_PATH * 2, "%s_%s_%02d", logConfig_.logFileName, strtime, ++fileCount_);
-        CloseHandle(logFileHandle_);
-        logFileHandle_ = NULL;
-        InitFile(loctime);
-    }
-
-    // 파일 끝으로 파일 포인터를 옮긴다. 
-    SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
-    WriteFile(logFileHandle_, outputString, (UINT32)strlen(outputString), &dwWrittenBytes, NULL);
-}
 
 void LogManagerImpl::OutputConsole(LogInfoType logInfo, CHAR* outputString)
 {
@@ -274,19 +227,4 @@ void LogManagerImpl::OutputConsole(LogInfoType logInfo, CHAR* outputString)
 void LogManagerImpl::OutputDebugWnd(CHAR* outputString)
 {
     OutputDebugStringA(outputString);
-}
-
-BOOL LogManagerImpl::InitFile(tm curLocalTime)
-{
-    logFileLocalTime_ = curLocalTime;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH, "./Log/%s.log", logFileName_);
-    logFileHandle_ = CreateFileA(outputString_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-    if (logFileHandle_ == NULL)
-    {
-        return FALSE;
-    }
-
-    fileCount_ = 0;
-    return TRUE;
 }
