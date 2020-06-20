@@ -2,6 +2,7 @@
 #define __LOGGING_INTERFACE_H__
 
 #include<iostream>
+#include "Util.h"
 
 class LoggingInterface
 {

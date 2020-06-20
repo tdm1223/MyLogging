@@ -10,8 +10,9 @@
 #include "Thread.h"
 #include "LogQueue.h"
 #include "Util.h"
+#include "LoggingInterface.h"
 
-static CHAR szLogInfoType_StringTable[][100] =
+static CHAR logInfoTypeTable[][100] =
 {
     "LOG_NONE",
     "LOG_INFO_LOW",
@@ -20,29 +21,12 @@ static CHAR szLogInfoType_StringTable[][100] =
     "LOG_INFO_CRITICAL",
 };
 
-struct LogConfig
-{
-    INT logInfoLevelByTypes[MAX_STORAGE_TYPE];
-    CHAR logFileName[MAX_PATH];
 
-    FileLogType fileLogType; // 로그 파일 형식
-    HWND hWnd; // 로그를 남길 윈도우 핸들
-    UINT32 processTick; // Log 처리 시간 (기본 1초)
-    UINT32 fileMaxSize; // Log파일 사이즈
 
-    LogConfig()
-    {
-        ZeroMemory(this, sizeof(LogConfig));
-        processTick = DEFAULT_TICK;
-        fileMaxSize = 1024 * 50000; // 50MB 기본으로 설정 최대 100MB 까지 가능
-    }
-};
-
-//글로벌 변수
-static CHAR outStr[MAX_OUTPUT_LENGTH];
+// 글로벌 변수
 static LogMsg logMsg[MAX_QUEUE_CNT];
 
-//실제 로그를 구현한 클래스
+// 실제 로그를 구현한 클래스
 class LogManagerImpl : public Thread
 {
 public:
@@ -77,7 +61,7 @@ private:
 
 private:
     std::recursive_mutex lock_;
-    INT logInfoLevel_[MAX_STORAGE_TYPE];
+    INT logInfoLevel_[MAX_LOG_TYPE];
     CHAR logFileName_[MAX_PATH];
     FileLogType fileLogType_; //로그 파일의 형식
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
@@ -89,7 +73,9 @@ private:
     LogQueue logQueue_; // 메세지 큐
     INT msgBufferIndex_; //현재 메세지 버퍼 위치
     UINT32 fileMaxSize_;
-    struct tm logFileLocalTime; // 현재 로그 파일의 생성 시간
+    struct tm logFileLocalTime_; // 현재 로그 파일의 생성 시간
+    std::vector<LoggingInterface*> loggingList_;
+
 };
 
 class LogManager : public LogManagerImpl, public Singleton<LogManager>

@@ -42,14 +42,14 @@
     <ClCompile Include="LogManager.cpp">
       <Filter>소스 파일\매니저</Filter>
     </ClCompile>
-    <ClCompile Include="Thread.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="LogQueue.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="LoggingInterface.cpp">
       <Filter>소스 파일\로깅</Filter>
+    </ClCompile>
+    <ClCompile Include="LogQueue.cpp">
+      <Filter>소스 파일\매니저</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>소스 파일\매니저</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

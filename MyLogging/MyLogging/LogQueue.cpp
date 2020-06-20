@@ -21,7 +21,7 @@ void LogQueue::Pop()
     logQueue_.pop();
 }
 
-LogMsg* LogQueue::GetFront()
+LogMsg* LogQueue::Front()
 {
     SpinLockGuard lock(lock_);
     if (logQueue_.empty())
@@ -32,7 +32,7 @@ LogMsg* LogQueue::GetFront()
     return logQueue_.front();
 }
 
-INT LogQueue::GetSize()
+SIZE_T LogQueue::Size()
 {
     SpinLockGuard lock(lock_);
     return logQueue_.size();

@@ -5,30 +5,38 @@ int main()
 {
     LogConfig logConfig;
     strncpy_s(logConfig.logFileName, "Test", MAX_PATH);
-    logConfig.logInfoLevelByTypes[file] = LOG_INFO_LOW;
-    logConfig.logInfoLevelByTypes[console] = LOG_INFO_LOW;
+    logConfig.logInfoLevelByTypes[kFile] = kInfoLow;
+    logConfig.logInfoLevelByTypes[kConsole] = kInfoLow;
 
     LogManager::INIT_LOG(logConfig);
 
-    while (1)
+    /*while (1)
     {
         int a;
         std::cin >> a;
         switch (a)
         {
-        case LOG_INFO_LOW:
-            LogManager::LOG(LOG_INFO_LOW, "테스트1");
+        case kInfoLow:
+            LogManager::LOG(kInfoLow, "테스트1");
             break;
-        case LOG_INFO_NORMAL:
-            LogManager::LOG(LOG_INFO_NORMAL, "테스트2");
+        case kInfoNormal:
+            LogManager::LOG(kInfoNormal, "테스트2");
             break;
-        case LOG_INFO_HIGH:
-            LogManager::LOG(LOG_INFO_HIGH, "테스트3");
+        case kInfoHigh:
+            LogManager::LOG(kInfoHigh, "테스트3");
             break;
-        case LOG_INFO_CRITICAL:
-            LogManager::LOG(LOG_INFO_CRITICAL, "테스트4");
+        case kInfoCritical:
+            LogManager::LOG(kInfoCritical, "테스트4");
             break;
         }
+    }*/
+
+    while (1)
+    {
+        LogManager::LOG(kInfoLow, "테스트1");
+        LogManager::LOG(kInfoNormal, "테스트2");
+        LogManager::LOG(kInfoHigh, "테스트3");
+        LogManager::LOG(kInfoCritical, "테스트4");
     }
     LogManager::CLOSE_LOG();
     return 0;
