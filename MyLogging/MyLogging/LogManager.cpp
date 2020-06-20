@@ -48,10 +48,8 @@ void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ..
 LogManagerImpl::LogManagerImpl()
 {
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
-    fileLogType_ = FileLogType::kFileNone;
     windowHandle_ = NULL;
     msgBufferIndex_ = 0;
-    fileMaxSize_ = 0;
     isInit_ = FALSE;
 }
 
@@ -67,9 +65,7 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
     std::lock_guard<std::recursive_mutex> lock(lock_);
     CloseAllLog();
     CopyMemory(logInfoLevel_, logConfig.logInfoLevelByTypes, MAX_LOG_TYPE * sizeof(INT));
-
     logConfig_ = logConfig;
-    fileMaxSize_ = logConfig.fileMaxSize;
     windowHandle_ = logConfig.hWnd;
 
     // 파일로그를 설정했다면
@@ -79,10 +75,12 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
         loggingList_.push_back(tmp);
     }
 
+    loggingList_.push_back(new ConsoleLogging(logConfig));
     for (auto logging : loggingList_)
     {
         logging->Init();
     }
+
     isInit_ = TRUE;
     CreateThread(logConfig.processTick);
     Run();
@@ -118,10 +116,6 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
         log->Logging(outputString_, localTime);
     }
 
-    if (logLevelByTypes[kConsole] <= logLevel)
-    {
-        OutputConsole(logInfo, outputString_);
-    }
     if (logLevelByTypes[kDebugView] <= logLevel)
     {
         OutputDebugWnd(outputString_);
@@ -136,17 +130,13 @@ void LogManagerImpl::CloseAllLog()
     OnProcess();
 
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
-    //ZeroMemory(logFileName_, MAX_PATH);
-    fileLogType_ = FileLogType::kFileNone;
     windowHandle_ = NULL;
     msgBufferIndex_ = 0;
 
-    //파일 로그를 끝낸다.
-    //if (logFileHandle_)
-    //{
-    //    CloseHandle(logFileHandle_);
-    //    logFileHandle_ = NULL;
-    //}
+    for (auto logging : loggingList_)
+    {
+        logging->Close();
+    }
 
     //쓰레드 종료
     Stop();
@@ -210,18 +200,9 @@ void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)
     logQueue_.Push(logMsg);
 }
 
-
-
 void LogManagerImpl::SetLogInfoTypes(LogType logType, LogInfoType logInfoType)
 {
     logInfoLevel_[logType] = logInfoType;
-}
-
-
-
-void LogManagerImpl::OutputConsole(LogInfoType logInfo, CHAR* outputString)
-{
-    printf("[%d] - %s", logInfo, outputString);
 }
 
 void LogManagerImpl::OutputDebugWnd(CHAR* outputString)

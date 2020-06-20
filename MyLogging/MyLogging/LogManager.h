@@ -26,9 +26,11 @@ class LoggingInterface
 public:
     virtual BOOL Init() = 0;
     virtual void Logging(CHAR* outputString, tm localTime) = 0;
+    virtual void Close() = 0;
 protected:
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
     LogConfig logConfig_;
+    LogInfoType logInfo_;
 };
 
 class FileLogging : public LoggingInterface
@@ -36,6 +38,8 @@ class FileLogging : public LoggingInterface
 public:
     FileLogging(LogConfig& config)
     {
+        fileMaxSize_ = 0;
+        fileLogType_ = FileLogType::kFileNone;
         logConfig_ = config;
         ZeroMemory(logFileName_, MAX_PATH);
         logFileHandle_ = NULL;
@@ -66,13 +70,13 @@ public:
         localtime_s(&loctime, &curtime);
         strftime(strtime, 100, "%Y%m%d_01", &loctime);
 
+        fileMaxSize_ = logConfig_.fileMaxSize;
         return InitFile(loctime);
     }
     void Logging(CHAR* outputString, tm localTime)
     {
         if (logFileHandle_ == nullptr)
         {
-            std::cout << "널임" << std::endl;
             return;
         }
 
@@ -98,12 +102,43 @@ public:
         SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
         WriteFile(logFileHandle_, outputString, (UINT32)strlen(outputString), &dwWrittenBytes, NULL);
     }
+    void Close()
+    {
+        fileLogType_ = FileLogType::kFileNone;
+        //파일 로그를 끝낸다.
+        if (logFileHandle_)
+        {
+            CloseHandle(logFileHandle_);
+            logFileHandle_ = NULL;
+        }
+    }
 private:
+    FileLogType fileLogType_;       //로그 파일의 형식
     struct tm logFileLocalTime_;    // 로그 파일 생성 시간
     CHAR logFileName_[MAX_PATH];    // 로그 파일 이름
     UINT32 fileCount_;              // 겹치는 파일이 없게 하기 위한 파일 카운트
     HANDLE logFileHandle_;          // 파일 핸들
+    UINT32 fileMaxSize_;
 };
+
+class ConsoleLogging : public LoggingInterface
+{
+public:
+    ConsoleLogging(LogConfig& config)
+    {
+        logConfig_ = config;
+    }
+    BOOL Init()
+    {
+        return TRUE;
+    }
+    void Logging(CHAR* outputString, tm localTime)
+    {
+        printf("[%d] - %s", logInfo_, outputString);
+    }
+    void Close() { }
+};
+
 
 // 글로벌 변수
 static LogMsg logMsg[MAX_QUEUE_CNT];
@@ -135,19 +170,16 @@ public:
     void SetLogInfoTypes(LogType logType, LogInfoType logInfoType);
 
 private:
-    void OutputConsole(LogInfoType logInfo, CHAR* outputString);
     void OutputDebugWnd(CHAR* outputString);
 
 private:
     std::recursive_mutex lock_;
     INT logInfoLevel_[MAX_LOG_TYPE];
-    FileLogType fileLogType_; //로그 파일의 형식
     LogConfig logConfig_; // 로그 저장 변수
     HWND windowHandle_; // Window로 로그를 남길 윈도우 핸들
     BOOL isInit_;
     LogQueue logQueue_; // 메세지 큐
     INT msgBufferIndex_; //현재 메세지 버퍼 위치
-    UINT32 fileMaxSize_;
     std::vector<LoggingInterface*> loggingList_;
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
 };
