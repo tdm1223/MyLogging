@@ -24,9 +24,13 @@ static CHAR logInfoTypeTable[][100] =
 class LoggingInterface
 {
 public:
-    virtual BOOL Init() = 0;
+    virtual BOOL Init()
+    {
+        return TRUE;
+    }
     virtual void Logging(CHAR* outputString, tm localTime) = 0;
-    virtual void Close() = 0;
+    virtual void Close() {}
+
 protected:
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
     LogConfig logConfig_;
@@ -48,16 +52,13 @@ public:
     BOOL InitFile(tm loctime)
     {
         CreateDirectory(L"./LOG", NULL);
-
         logFileLocalTime_ = loctime;
         _snprintf_s(outputString_, MAX_OUTPUT_LENGTH, "./Log/%s.log", logFileName_);
         logFileHandle_ = CreateFileA(outputString_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
         if (logFileHandle_ == NULL)
         {
             return FALSE;
         }
-
         fileCount_ = 0;
         return TRUE;
     }
@@ -112,6 +113,7 @@ public:
             logFileHandle_ = NULL;
         }
     }
+
 private:
     FileLogType fileLogType_;       //로그 파일의 형식
     struct tm logFileLocalTime_;    // 로그 파일 생성 시간
@@ -128,17 +130,24 @@ public:
     {
         logConfig_ = config;
     }
-    BOOL Init()
-    {
-        return TRUE;
-    }
     void Logging(CHAR* outputString, tm localTime)
     {
         printf("[%d] - %s", logInfo_, outputString);
     }
-    void Close() { }
 };
 
+class DebugLogging : public LoggingInterface
+{
+public:
+    DebugLogging(LogConfig& config)
+    {
+        logConfig_ = config;
+    }
+    void Logging(CHAR* outputString, tm localTime)
+    {
+        OutputDebugStringA(outputString);
+    }
+};
 
 // 글로벌 변수
 static LogMsg logMsg[MAX_QUEUE_CNT];
@@ -168,9 +177,6 @@ public:
     void ResetBufferIndex();
     void PushMsgQueue(LogMsg* logMsg);
     void SetLogInfoTypes(LogType logType, LogInfoType logInfoType);
-
-private:
-    void OutputDebugWnd(CHAR* outputString);
 
 private:
     std::recursive_mutex lock_;

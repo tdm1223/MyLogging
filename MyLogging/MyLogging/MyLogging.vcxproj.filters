@@ -30,51 +30,33 @@
     <ClCompile Include="Main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DebugLogging.cpp">
-      <Filter>소스 파일\로깅</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkLogging.cpp">
-      <Filter>소스 파일\로깅</Filter>
-    </ClCompile>
     <ClCompile Include="LogManager.cpp">
       <Filter>소스 파일\매니저</Filter>
     </ClCompile>
-    <ClCompile Include="LoggingInterface.cpp">
+    <ClCompile Include="LogQueue.cpp">
       <Filter>소스 파일\로깅</Filter>
     </ClCompile>
-    <ClCompile Include="LogQueue.cpp">
-      <Filter>소스 파일\매니저</Filter>
-    </ClCompile>
     <ClCompile Include="Thread.cpp">
-      <Filter>소스 파일\매니저</Filter>
+      <Filter>소스 파일\로깅</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DebugLogging.h">
-      <Filter>헤더 파일\로깅</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkLogging.h">
-      <Filter>헤더 파일\로깅</Filter>
-    </ClInclude>
     <ClInclude Include="LogManager.h">
       <Filter>헤더 파일\매니저</Filter>
     </ClInclude>
-    <ClInclude Include="SpinLockGuard.h">
-      <Filter>헤더 파일\매니저</Filter>
+    <ClInclude Include="LogQueue.h">
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="Singleton.h">
-      <Filter>헤더 파일\매니저</Filter>
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
-    <ClInclude Include="LogQueue.h">
-      <Filter>헤더 파일\매니저</Filter>
+    <ClInclude Include="SpinLockGuard.h">
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="Thread.h">
-      <Filter>헤더 파일\매니저</Filter>
+      <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
-      <Filter>헤더 파일\매니저</Filter>
-    </ClInclude>
-    <ClInclude Include="LoggingInterface.h">
       <Filter>헤더 파일\로깅</Filter>
     </ClInclude>
   </ItemGroup>

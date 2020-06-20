@@ -76,6 +76,8 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
     }
 
     loggingList_.push_back(new ConsoleLogging(logConfig));
+    loggingList_.push_back(new DebugLogging(logConfig));
+
     for (auto logging : loggingList_)
     {
         logging->Init();
@@ -116,10 +118,10 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
         log->Logging(outputString_, localTime);
     }
 
-    if (logLevelByTypes[kDebugView] <= logLevel)
-    {
-        OutputDebugWnd(outputString_);
-    }
+    //if (logLevelByTypes[kDebugView] <= logLevel)
+    //{
+    //    OutputDebugWnd(outputString_);
+    //}
 }
 
 void LogManagerImpl::CloseAllLog()
@@ -205,7 +207,3 @@ void LogManagerImpl::SetLogInfoTypes(LogType logType, LogInfoType logInfoType)
     logInfoLevel_[logType] = logInfoType;
 }
 
-void LogManagerImpl::OutputDebugWnd(CHAR* outputString)
-{
-    OutputDebugStringA(outputString);
-}
