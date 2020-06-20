@@ -32,7 +32,7 @@ LogMsg* LogQueue::GetFront()
     return logQueue_.front();
 }
 
-INT32 LogQueue::GetSize()
+INT LogQueue::GetSize()
 {
     SpinLockGuard lock(lock_);
     return logQueue_.size();

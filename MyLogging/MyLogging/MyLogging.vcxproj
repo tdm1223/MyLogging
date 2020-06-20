@@ -144,6 +144,8 @@
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NetworkLogging.cpp" />
+    <ClCompile Include="LogQueue.cpp" />
+    <ClCompile Include="Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugLogging.h" />
@@ -151,6 +153,11 @@
     <ClInclude Include="LoggingInterface.h" />
     <ClInclude Include="LogManager.h" />
     <ClInclude Include="NetworkLogging.h" />
+    <ClInclude Include="LogQueue.h" />
+    <ClInclude Include="Singleton.h" />
+    <ClInclude Include="SpinLockGuard.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

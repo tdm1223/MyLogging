@@ -1,13 +1,13 @@
 ﻿#ifndef UTIL
 #define UTIL
 
-const int MAX_STORAGE_TYPE  = 3;
-const int MAX_OUTPUT_LENGTH = 1024 * 4;
-const int MAX_QUEUE_CNT     = 10000;
-const int DEFAULT_TICK      = 1000;          // 로깅 갱신 시간 : 1초
-const int MAX_LOGFILE_SIZE  = 1024 * 200000; // 로그 파일 크기 : 200MB
-const int MAX_LOGTYPE       = 4;
-const int MAX_IP_LENGTH     = 16;
+const INT MAX_STORAGE_TYPE  = 3;
+const INT MAX_OUTPUT_LENGTH = 1024 * 4;
+const INT MAX_QUEUE_CNT     = 10000;
+const INT DEFAULT_TICK      = 1000;          // 로깅 갱신 시간 : 1초
+const INT MAX_LOGFILE_SIZE  = 1024 * 200000; // 로그 파일 크기 : 200MB
+const INT MAX_LOGTYPE       = 4;
+const INT MAX_IP_LENGTH     = 16;
 
 enum LogInfoType
 {
@@ -25,7 +25,7 @@ enum LogType
     debugView = 0x02,
 };
 
-enum class FileLogType : int
+enum class FileLogType : INT
 {
     none = 0x00,
     text = 0x01,
@@ -35,7 +35,7 @@ enum class FileLogType : int
 struct LogMsg
 {
     LogInfoType logMsgInfoType;
-    char outputString[MAX_OUTPUT_LENGTH];
+    CHAR outputString[MAX_OUTPUT_LENGTH];
 };
 
 #endif // !UTIL

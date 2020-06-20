@@ -16,7 +16,7 @@ public:
     void Push(LogMsg* item);
     void Pop();
     LogMsg* GetFront();
-    INT32 GetSize();
+    INT GetSize();
     void Clear();
 
 private:

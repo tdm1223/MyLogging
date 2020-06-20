@@ -1,108 +1,291 @@
-#include"LogManager.h"
-
-LogManager* LogManager::instance_ = nullptr;
+#include "LogManager.h"
+#include <iostream>
 
 LogManager::LogManager()
 {
 }
 
-LogManager* LogManager::GetInstance()
-{
-    if (instance_ == nullptr)
-    {
-        instance_ = new LogManager();
-    }
-    return instance_;
-}
-
 LogManager::~LogManager()
 {
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    for (auto log : loggingList)
-    {
-        delete log;
-    }
 }
 
-void LogManager::AddLogType(logType type)
+BOOL LogManager::INIT_LOG(LogConfig& logConfig)
 {
-    mutex_.lock();
-    LoggingInterface* loggingInterface;
-    switch (type)
-    {
-    case logType::kFile:
-        loggingInterface = new FileLogging();
-        break;
-    case logType::kDebug:
-        loggingInterface = new DebugLogging();
-        break;
-    case logType::kNetwork:
-        loggingInterface = new NetworkLogging();
-        break;
-    }
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    loggingList.push_back(loggingInterface);
-    mutex_.unlock();
+    return LogManager::GetInstance()->Init(logConfig);
 }
 
-void LogManager::DeleteLogType(logType type)
+void LogManager::CLOSE_LOG()
 {
-    mutex_.lock();
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    auto iter = loggingList.begin();
-    for (auto log : loggingList)
+    LogManager::GetInstance()->CloseAllLog();
+}
+
+void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ...)
+{
+    LONG queueCnt = 0;
+    do
     {
-        if (log->GetLoggingType() == static_cast<int>(type))
+        queueCnt = LogManager::GetInstance()->IncrementBufferIndex();
+        // 현재 큐 Size를 초과하였다면 
+        if (queueCnt == MAX_QUEUE_CNT)
         {
-            loggingList.erase(iter);
+            LogManager::GetInstance()->ResetBufferIndex();
+            queueCnt = 0;
         }
-        else
+        else if (queueCnt > MAX_QUEUE_CNT)
         {
-            iter++;
+            Sleep(1);
         }
-    }
-    mutex_.unlock();
+    } while (queueCnt >= MAX_QUEUE_CNT);
+
+    va_list	argptr;
+    va_start(argptr, outputString);
+    _vsnprintf_s(logMsg[queueCnt].outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
+    va_end(argptr);
+    logMsg[queueCnt].logMsgInfoType = logInfoType;
+    LogManager::GetInstance()->PushMsgQueue(&logMsg[queueCnt]);
 }
 
-void LogManager::Logging()
+LogManagerImpl::LogManagerImpl()
 {
-    mutex_.lock();
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    for (auto log : loggingList)
+    ZeroMemory(logInfoLevel_, MAX_STORAGE_TYPE * sizeof(INT));
+    ZeroMemory(logFileName_, MAX_PATH);
+    fileLogType_ = FileLogType::none;
+    windowHandle_ = NULL;
+    logFileHandle_ = NULL;
+    msgBufferIndex_ = 0;
+    fileMaxSize_ = 0;
+    fileCount_ = 0;
+    isInit_ = FALSE;
+}
+
+LogManagerImpl::~LogManagerImpl()
+{
+    InsertMsgToQueue(LOG_INFO_NORMAL, "SYSTEM | cLogImpl::~cLogImpl() | cLogImpl 소멸자 호출");
+    CloseAllLog();
+    DestroyThread();
+}
+
+BOOL LogManagerImpl::Init(LogConfig& logConfig)
+{
+    std::lock_guard<std::recursive_mutex> lock(lock_);
+    CloseAllLog();
+    CHAR strtime[100];
+    CopyMemory(logInfoLevel_, logConfig.logInfoLevelByTypes, MAX_STORAGE_TYPE * sizeof(INT));
+    time_t curtime;
+    struct tm localTime;
+    curtime = time(NULL);
+    localtime_s(&localTime, &curtime);
+    strftime(strtime, 100, "%Y%m%d", &localTime);
+    CreateDirectory(L"./LOG", NULL);
+    logConfig_ = logConfig;
+    _snprintf_s(logFileName_, MAX_PATH, "%s_%s", logConfig.logFileName, strtime);
+    fileMaxSize_ = logConfig.fileMaxSize;
+    windowHandle_ = logConfig.hWnd;
+    BOOL isError = FALSE;
+
+    // 파일로그를 설정했다면
+    if (logInfoLevel_[file] != LOG_NONE)
     {
-        if (log->GetEnabled() == true)
-        {
-            log->Logging();
-        }
+        isError = InitFile(localTime);
     }
-    mutex_.unlock();
-}
 
-std::vector<LoggingInterface*>& LogManager::GetLoggingList()
-{
-    return loggingList_;
-}
-
-void LogManager::Disable(logType type)
-{
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    for (auto log : loggingList)
+    //// 에러 발생
+    if (isError == FALSE)
     {
-        if (log->GetLoggingType() == static_cast<int>(type))
-        {
-            log->SetEnabled(false);
-        }
+        CloseAllLog();
+        return FALSE;
+    }
+
+    isInit_ = TRUE;
+    CreateThread(logConfig.processTick);
+    Run();
+    return TRUE;
+}
+
+void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
+{
+    if (isInit_ == FALSE)
+    {
+        return;
+    }
+    //저장 타입에 해당하는 로그 레벨을 가져온다.
+    INT logLevel = (INT)logInfo;
+    INT logStringIndex = logLevel;
+    INT* logLevelByTypes = logInfoLevel_;
+
+    //로그, 시간 : 정보형태 : 정보레벨 : 클래스 : 함수 : 에러원인
+    //현재시간을 얻어온다.
+    CHAR szTime[25];
+    time_t curTime;
+    struct tm localTime;
+    //LOG ENUM과 StringTable간의 정보를 매치 시킨다.
+    curTime = time(NULL);
+    localtime_s(&localTime, &curTime);
+    strftime(szTime, 25, "%Y/%m/%d(%H:%M:%S)", &localTime);
+    outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
+    szTime[24] = NULL;
+
+    szLogInfoType_StringTable[logStringIndex][99] = NULL;
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", szTime, (logInfo >> 4) ? "에러" : "정보", szLogInfoType_StringTable[logStringIndex], outputString, 0x0d, 0x0a);
+
+    if (logLevelByTypes[file] <= logLevel)
+    {
+        OutputFile(outputString_, localTime);
+    }
+    if (logLevelByTypes[console] <= logLevel)
+    {
+        OutputConsole(logInfo, outputString_);
+    }
+    if (logLevelByTypes[debugView] <= logLevel)
+    {
+        OutputDebugWnd(outputString_);
     }
 }
 
-void LogManager::Enable(logType type)
+void LogManagerImpl::CloseAllLog()
 {
-    std::vector<LoggingInterface*>& loggingList = GetLoggingList();
-    for (auto log : loggingList)
+    std::lock_guard<std::recursive_mutex> lock(lock_);
+
+    //남아있는 로그를 모두 찍는다.
+    OnProcess();
+
+    ZeroMemory(logInfoLevel_, MAX_STORAGE_TYPE * sizeof(INT));
+    ZeroMemory(logFileName_, MAX_PATH);
+    fileLogType_ = FileLogType::none;
+    windowHandle_ = NULL;
+    msgBufferIndex_ = 0;
+
+    //파일 로그를 끝낸다.
+    if (logFileHandle_)
     {
-        if (log->GetLoggingType() == static_cast<int>(type))
-        {
-            log->SetEnabled(true);
-        }
+        CloseHandle(logFileHandle_);
+        logFileHandle_ = NULL;
     }
+
+    //쓰레드 종료
+    Stop();
+}
+
+void LogManagerImpl::CloseWindowLog()
+{
+    windowHandle_ = NULL;
+}
+
+void LogManagerImpl::OnProcess()
+{
+    std::lock_guard<std::recursive_mutex> lock(lock_);
+    size_t logCount = logQueue_.GetSize();
+    for (UINT32 i = 0; i < logCount; i++)
+    {
+        LogMsg* pLogMsg = logQueue_.GetFront();
+        if (NULL == pLogMsg)
+        {
+            return;
+        }
+        //로그를 찍는다.
+        LogOutput(pLogMsg->logMsgInfoType, pLogMsg->outputString);
+        logQueue_.Pop();
+    }
+}
+
+size_t LogManagerImpl::GetQueueSize()
+{
+    return logQueue_.GetSize();
+}
+
+void LogManagerImpl::InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outputString)
+{
+    LONG queueCount = InterlockedIncrement((LONG*)&msgBufferIndex_);
+
+    //현재 큐 Size를 초과하였다면 
+    if (MAX_QUEUE_CNT == queueCount)
+    {
+        InterlockedExchange((LONG*)&msgBufferIndex_, 0);
+        queueCount = 0;
+    }
+
+    strncpy_s(logMsg[queueCount].outputString, outputString, MAX_OUTPUT_LENGTH);
+    logMsg[queueCount].logMsgInfoType = logInfoType;
+    logQueue_.Push(&logMsg[queueCount]);
+}
+
+UINT32 LogManagerImpl::IncrementBufferIndex()
+{
+    return InterlockedIncrement((LONG*)&msgBufferIndex_);
+}
+
+void LogManagerImpl::ResetBufferIndex()
+{
+    InterlockedExchange((LONG*)&msgBufferIndex_, 0);
+}
+
+void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)
+{
+    logQueue_.Push(logMsg);
+}
+
+CHAR* LogManagerImpl::GetLogFileName()
+{
+    return logFileName_;
+}
+
+void LogManagerImpl::SetLogInfoTypes(LogType logType, LogInfoType logInfoType)
+{
+    logInfoLevel_[logType] = logInfoType;
+}
+
+void LogManagerImpl::OutputFile(CHAR* outputString, tm localTime)
+{
+    if (logFileHandle_ == nullptr)
+    {
+        return;
+    }
+
+    DWORD dwWrittenBytes = 0;
+    UINT32 dwSize = 0;
+    dwSize = GetFileSize(logFileHandle_, NULL);
+
+    // 파일 용량이 제한에 걸렸다면, 날짜가 다르다면 새로 만든다.
+    if (dwSize > fileMaxSize_ || dwSize > MAX_LOGFILE_SIZE || localTime.tm_mday != logFileLocalTime.tm_mday)
+    {
+        CHAR strtime[100];
+        time_t curtime;
+        struct tm loctime;
+        curtime = time(NULL);
+        localtime_s(&loctime, &curtime);
+        strftime(strtime, 100, "%Y%m%d_01", &loctime);
+        _snprintf_s(logFileName_, MAX_PATH * 2, "%s_%s_%02d", logConfig_.logFileName, strtime, ++fileCount_);
+        CloseHandle(logFileHandle_);
+        logFileHandle_ = NULL;
+        InitFile(loctime);
+    }
+
+    // 파일 끝으로 파일 포인터를 옮긴다. 
+    SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
+    WriteFile(logFileHandle_, outputString, (UINT32)strlen(outputString), &dwWrittenBytes, NULL);
+}
+
+void LogManagerImpl::OutputConsole(LogInfoType logInfo, CHAR* outputString)
+{
+    printf("[%d] - %s", logInfo, outputString);
+}
+
+void LogManagerImpl::OutputDebugWnd(CHAR* outputString)
+{
+    OutputDebugStringA(outputString);
+}
+
+BOOL LogManagerImpl::InitFile(tm curLocalTime)
+{
+    logFileLocalTime = curLocalTime;
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH, "./Log/%s.log", logFileName_);
+    logFileHandle_ = CreateFileA(outputString_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (logFileHandle_ == NULL)
+    {
+        return FALSE;
+    }
+
+    fileCount_ = 0;
+    return TRUE;
 }
