@@ -99,35 +99,29 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     INT logStringIndex = logLevel;
     INT* logLevelByTypes = logInfoLevel_;
 
-    //로그, 시간 : 정보형태 : 정보레벨 : 클래스 : 함수 : 에러원인
-    CHAR szTime[25];
+    CHAR loggingTime[25];
     time_t curTime;
-    struct tm localTime;
     curTime = time(NULL);
-    localtime_s(&localTime, &curTime);
-    strftime(szTime, 25, "%Y/%m/%d(%H:%M:%S)", &localTime);
+    struct tm localTime;
+    localtime_s(&localTime, &curTime); // curTime을 localTime에 저장
+    strftime(loggingTime, 25, "%Y/%m/%d(%H:%M:%S)", &localTime); // 구한 localTime의 형식 조절
     outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
-    szTime[24] = NULL;
+    loggingTime[24] = NULL;
 
     logInfoTypeTable[logStringIndex][99] = NULL;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", szTime, (logInfo >> 4) ? "에러" : "정보", logInfoTypeTable[logStringIndex], outputString, 0x0d, 0x0a);
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, (logInfo >> 4) ? "에러" : "정보", logInfoTypeTable[logStringIndex], outputString, 0x0d, 0x0a);
     
     for (auto log : loggingList_)
     {
         log->Logging(outputString_, localTime, logInfo);
     }
-
-    //if (logLevelByTypes[kDebugView] <= logLevel)
-    //{
-    //    OutputDebugWnd(outputString_);
-    //}
 }
 
 void LogManagerImpl::CloseAllLog()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
 
-    //남아있는 로그를 모두 찍는다.
+    //남아있는 로그를 모두 찍음
     OnProcess();
 
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));

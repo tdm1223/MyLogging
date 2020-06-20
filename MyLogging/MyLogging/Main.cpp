@@ -34,9 +34,9 @@ int main()
     while (1)
     {
         LogManager::LOG(kInfoLow, "테스트1");
-        //LogManager::LOG(kInfoNormal, "테스트2");
-        //LogManager::LOG(kInfoHigh, "테스트3");
-        //LogManager::LOG(kInfoCritical, "테스트4");
+        LogManager::LOG(kInfoNormal, "테스트2");
+        LogManager::LOG(kInfoHigh, "테스트3");
+        LogManager::LOG(kInfoCritical, "테스트4");
     }
     LogManager::CLOSE_LOG();
     return 0;
