@@ -43,16 +43,14 @@ struct LogConfig
     INT logInfoLevelByTypes[MAX_LOG_TYPE];
     CHAR logFileName[MAX_PATH];
 
-    FileLogType fileLogType; // 로그 파일 형식
-    HWND hWnd; // 로그를 남길 윈도우 핸들
-    UINT32 processTick; // Log 처리 시간 (기본 1초)
-    UINT32 fileMaxSize; // Log파일 사이즈
+    FileLogType fileLogType;    // 로그 파일 형식
+    HWND hWnd;                  // 로그를 남길 윈도우 핸들
+    UINT32 processTick;         // Log 처리 시간 (기본 1초)
 
     LogConfig()
     {
         ZeroMemory(this, sizeof(LogConfig));
         processTick = DEFAULT_TICK;
-        fileMaxSize = MAX_LOGFILE_SIZE;
     }
 };
 

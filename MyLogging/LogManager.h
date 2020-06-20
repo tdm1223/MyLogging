@@ -42,7 +42,7 @@ class FileLogging : public LoggingInterface
 public:
     FileLogging(LogConfig& config)
     {
-        fileMaxSize_ = 0;
+        fileMaxSize_ = MAX_LOGFILE_SIZE;
         fileLogType_ = FileLogType::kFileNone;
         ZeroMemory(logFileName_, MAX_PATH);
         logConfig_ = config;
@@ -57,14 +57,13 @@ public:
         curtime = time(NULL);
         localtime_s(&loctime, &curtime);
 
-        CreateDirectory(L"./LOG", NULL);
-        fileMaxSize_ = logConfig_.fileMaxSize;
+        CreateDirectory(L"../LOG", NULL);
         CHAR strtime[100];
         logFileLocalTime_ = loctime;
 
         strftime(strtime, 100, "%Y%m%d_01", &loctime);
 
-        _snprintf_s(logFileName_, MAX_PATH * 2, "./Log/%s_%s_%02d.log", logConfig_.logFileName, strtime, ++fileCount_);
+        _snprintf_s(logFileName_, MAX_PATH * 2, "../Log/%s_%s_%02d.log", logConfig_.logFileName, strtime, ++fileCount_);
         logFileHandle_ = CreateFileA(logFileName_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         if (logFileHandle_ == NULL)
         {
@@ -173,7 +172,6 @@ public:
     UINT32 IncrementBufferIndex();
     void ResetBufferIndex();
     void PushMsgQueue(LogMsg* logMsg);
-    void SetLogInfoTypes(LogType logType, LogInfoType logInfoType);
 
 private:
     std::recursive_mutex lock_;

@@ -194,9 +194,3 @@ void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)
 {
     logQueue_.Push(logMsg);
 }
-
-void LogManagerImpl::SetLogInfoTypes(LogType logType, LogInfoType logInfoType)
-{
-    logInfoLevel_[logType] = logInfoType;
-}
-

@@ -111,11 +111,6 @@ BOOL Thread::Stop()
     return FALSE;
 }
 
-UINT32 Thread::GetTickCount()
-{
-    return tickCount_;
-}
-
 UINT32 Thread::GetWaitTick()
 {
     return waitTick_;
