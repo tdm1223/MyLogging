@@ -1,4 +1,4 @@
-#ifndef SPIN_LOCK_GUARD
+﻿#ifndef SPIN_LOCK_GUARD
 #define SPIN_LOCK_GUARD
 
 #define WIN32_LEAN_AND_MEAN

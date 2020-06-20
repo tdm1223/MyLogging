@@ -1,4 +1,4 @@
-#include "LogManager.h"
+ï»¿#include "LogManager.h"
 #include <iostream>
 
 LogManager::LogManager()
@@ -25,7 +25,7 @@ void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ..
     do
     {
         queueCnt = LogManager::GetInstance()->IncrementBufferIndex();
-        // ÇöÀç Å¥ Size¸¦ ÃÊ°úÇÏ¿´´Ù¸é 
+        // í˜„ì¬ í Sizeë¥¼ ì´ˆê³¼í•˜ì˜€ë‹¤ë©´ 
         if (queueCnt == MAX_QUEUE_CNT)
         {
             LogManager::GetInstance()->ResetBufferIndex();
@@ -60,7 +60,7 @@ LogManagerImpl::LogManagerImpl()
 
 LogManagerImpl::~LogManagerImpl()
 {
-    InsertMsgToQueue(LOG_INFO_NORMAL, "SYSTEM | cLogImpl::~cLogImpl() | cLogImpl ¼Ò¸êÀÚ È£Ãâ");
+    InsertMsgToQueue(LOG_INFO_NORMAL, "SYSTEM | cLogImpl::~cLogImpl() | cLogImpl ì†Œë©¸ì í˜¸ì¶œ");
     CloseAllLog();
     DestroyThread();
 }
@@ -83,13 +83,13 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
     windowHandle_ = logConfig.hWnd;
     BOOL isError = FALSE;
 
-    // ÆÄÀÏ·Î±×¸¦ ¼³Á¤Çß´Ù¸é
+    // íŒŒì¼ë¡œê·¸ë¥¼ ì„¤ì •í–ˆë‹¤ë©´
     if (logInfoLevel_[file] != LOG_NONE)
     {
         isError = InitFile(localTime);
     }
 
-    //// ¿¡·¯ ¹ß»ı
+    //// ì—ëŸ¬ ë°œìƒ
     if (isError == FALSE)
     {
         CloseAllLog();
@@ -108,17 +108,17 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     {
         return;
     }
-    //ÀúÀå Å¸ÀÔ¿¡ ÇØ´çÇÏ´Â ·Î±× ·¹º§À» °¡Á®¿Â´Ù.
+    //ì €ì¥ íƒ€ì…ì— í•´ë‹¹í•˜ëŠ” ë¡œê·¸ ë ˆë²¨ì„ ê°€ì ¸ì˜¨ë‹¤.
     INT logLevel = (INT)logInfo;
     INT logStringIndex = logLevel;
     INT* logLevelByTypes = logInfoLevel_;
 
-    //·Î±×, ½Ã°£ : Á¤º¸ÇüÅÂ : Á¤º¸·¹º§ : Å¬·¡½º : ÇÔ¼ö : ¿¡·¯¿øÀÎ
-    //ÇöÀç½Ã°£À» ¾ò¾î¿Â´Ù.
+    //ë¡œê·¸, ì‹œê°„ : ì •ë³´í˜•íƒœ : ì •ë³´ë ˆë²¨ : í´ë˜ìŠ¤ : í•¨ìˆ˜ : ì—ëŸ¬ì›ì¸
+    //í˜„ì¬ì‹œê°„ì„ ì–»ì–´ì˜¨ë‹¤.
     CHAR szTime[25];
     time_t curTime;
     struct tm localTime;
-    //LOG ENUM°ú StringTable°£ÀÇ Á¤º¸¸¦ ¸ÅÄ¡ ½ÃÅ²´Ù.
+    //LOG ENUMê³¼ StringTableê°„ì˜ ì •ë³´ë¥¼ ë§¤ì¹˜ ì‹œí‚¨ë‹¤.
     curTime = time(NULL);
     localtime_s(&localTime, &curTime);
     strftime(szTime, 25, "%Y/%m/%d(%H:%M:%S)", &localTime);
@@ -126,7 +126,7 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     szTime[24] = NULL;
 
     szLogInfoType_StringTable[logStringIndex][99] = NULL;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", szTime, (logInfo >> 4) ? "¿¡·¯" : "Á¤º¸", szLogInfoType_StringTable[logStringIndex], outputString, 0x0d, 0x0a);
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", szTime, (logInfo >> 4) ? "ì—ëŸ¬" : "ì •ë³´", szLogInfoType_StringTable[logStringIndex], outputString, 0x0d, 0x0a);
 
     if (logLevelByTypes[file] <= logLevel)
     {
@@ -146,7 +146,7 @@ void LogManagerImpl::CloseAllLog()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
 
-    //³²¾ÆÀÖ´Â ·Î±×¸¦ ¸ğµÎ Âï´Â´Ù.
+    //ë‚¨ì•„ìˆëŠ” ë¡œê·¸ë¥¼ ëª¨ë‘ ì°ëŠ”ë‹¤.
     OnProcess();
 
     ZeroMemory(logInfoLevel_, MAX_STORAGE_TYPE * sizeof(INT));
@@ -155,14 +155,14 @@ void LogManagerImpl::CloseAllLog()
     windowHandle_ = NULL;
     msgBufferIndex_ = 0;
 
-    //ÆÄÀÏ ·Î±×¸¦ ³¡³½´Ù.
+    //íŒŒì¼ ë¡œê·¸ë¥¼ ëë‚¸ë‹¤.
     if (logFileHandle_)
     {
         CloseHandle(logFileHandle_);
         logFileHandle_ = NULL;
     }
 
-    //¾²·¹µå Á¾·á
+    //ì“°ë ˆë“œ ì¢…ë£Œ
     Stop();
 }
 
@@ -182,7 +182,7 @@ void LogManagerImpl::OnProcess()
         {
             return;
         }
-        //·Î±×¸¦ Âï´Â´Ù.
+        //ë¡œê·¸ë¥¼ ì°ëŠ”ë‹¤.
         LogOutput(pLogMsg->logMsgInfoType, pLogMsg->outputString);
         logQueue_.Pop();
     }
@@ -197,7 +197,7 @@ void LogManagerImpl::InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outpu
 {
     LONG queueCount = InterlockedIncrement((LONG*)&msgBufferIndex_);
 
-    //ÇöÀç Å¥ Size¸¦ ÃÊ°úÇÏ¿´´Ù¸é 
+    //í˜„ì¬ í Sizeë¥¼ ì´ˆê³¼í•˜ì˜€ë‹¤ë©´ 
     if (MAX_QUEUE_CNT == queueCount)
     {
         InterlockedExchange((LONG*)&msgBufferIndex_, 0);
@@ -245,7 +245,7 @@ void LogManagerImpl::OutputFile(CHAR* outputString, tm localTime)
     UINT32 dwSize = 0;
     dwSize = GetFileSize(logFileHandle_, NULL);
 
-    // ÆÄÀÏ ¿ë·®ÀÌ Á¦ÇÑ¿¡ °É·È´Ù¸é, ³¯Â¥°¡ ´Ù¸£´Ù¸é »õ·Î ¸¸µç´Ù.
+    // íŒŒì¼ ìš©ëŸ‰ì´ ì œí•œì— ê±¸ë ¸ë‹¤ë©´, ë‚ ì§œê°€ ë‹¤ë¥´ë‹¤ë©´ ìƒˆë¡œ ë§Œë“ ë‹¤.
     if (dwSize > fileMaxSize_ || dwSize > MAX_LOGFILE_SIZE || localTime.tm_mday != logFileLocalTime.tm_mday)
     {
         CHAR strtime[100];
@@ -260,7 +260,7 @@ void LogManagerImpl::OutputFile(CHAR* outputString, tm localTime)
         InitFile(loctime);
     }
 
-    // ÆÄÀÏ ³¡À¸·Î ÆÄÀÏ Æ÷ÀÎÅÍ¸¦ ¿Å±ä´Ù. 
+    // íŒŒì¼ ëìœ¼ë¡œ íŒŒì¼ í¬ì¸í„°ë¥¼ ì˜®ê¸´ë‹¤. 
     SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
     WriteFile(logFileHandle_, outputString, (UINT32)strlen(outputString), &dwWrittenBytes, NULL);
 }

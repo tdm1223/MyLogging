@@ -1,4 +1,4 @@
-#ifndef LOG_MANAGER
+ï»¿#ifndef LOG_MANAGER
 #define LOG_MANAGER
 
 #define WIN32_LEAN_AND_MEAN
@@ -25,44 +25,44 @@ struct LogConfig
     INT logInfoLevelByTypes[MAX_STORAGE_TYPE];
     CHAR logFileName[MAX_PATH];
 
-    FileLogType fileLogType; // ·Î±× ÆÄÀÏ Çü½Ä
-    HWND hWnd; // ·Î±×¸¦ ³²±æ À©µµ¿ì ÇÚµé
-    UINT32 processTick; // Log Ã³¸® ½Ã°£ (±âº» 1ÃÊ)
-    UINT32 fileMaxSize; // LogÆÄÀÏ »çÀÌÁî
+    FileLogType fileLogType; // ë¡œê·¸ íŒŒì¼ í˜•ì‹
+    HWND hWnd; // ë¡œê·¸ë¥¼ ë‚¨ê¸¸ ìœˆë„ìš° í•¸ë“¤
+    UINT32 processTick; // Log ì²˜ë¦¬ ì‹œê°„ (ê¸°ë³¸ 1ì´ˆ)
+    UINT32 fileMaxSize; // LogíŒŒì¼ ì‚¬ì´ì¦ˆ
 
     LogConfig()
     {
         ZeroMemory(this, sizeof(LogConfig));
         processTick = DEFAULT_TICK;
-        fileMaxSize = 1024 * 50000; // 50MB ±âº»À¸·Î ¼³Á¤ ÃÖ´ë 100MB ±îÁö °¡´É
+        fileMaxSize = 1024 * 50000; // 50MB ê¸°ë³¸ìœ¼ë¡œ ì„¤ì • ìµœëŒ€ 100MB ê¹Œì§€ ê°€ëŠ¥
     }
 };
 
-//±Û·Î¹ú º¯¼ö
+//ê¸€ë¡œë²Œ ë³€ìˆ˜
 static CHAR outStr[MAX_OUTPUT_LENGTH];
 static LogMsg logMsg[MAX_QUEUE_CNT];
 
-//½ÇÁ¦ ·Î±×¸¦ ±¸ÇöÇÑ Å¬·¡½º
+//ì‹¤ì œ ë¡œê·¸ë¥¼ êµ¬í˜„í•œ í´ë˜ìŠ¤
 class LogManagerImpl : public Thread
 {
 public:
     LogManagerImpl();
     virtual ~LogManagerImpl();
 
-    //ÀÎÅÍÆäÀÌ½º ÇÔ¼ö
+    //ì¸í„°í˜ì´ìŠ¤ í•¨ìˆ˜
     BOOL Init(LogConfig& logConfig);
     void LogOutput(LogInfoType logInfo, CHAR* outputString);
     void CloseAllLog();
 
-    // À©µµ¿ì Ã¢ ·Î±×¸¦ ³¡³½´Ù.
+    // ìœˆë„ìš° ì°½ ë¡œê·¸ë¥¼ ëë‚¸ë‹¤.
     void CloseWindowLog();
 
-    // ¾²·¹µå Ã³¸® ÇÔ¼ö
+    // ì“°ë ˆë“œ ì²˜ë¦¬ í•¨ìˆ˜
     virtual void OnProcess();
 
-    // Å¥ °ü·Ã ÇÔ¼ö
+    // í ê´€ë ¨ í•¨ìˆ˜
     size_t GetQueueSize();
-    void InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outputString); //Å¥¿¡ ¸Ş¼¼Áö¸¦ Ãß°¡ÇÑ´Ù. 
+    void InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outputString); //íì— ë©”ì„¸ì§€ë¥¼ ì¶”ê°€í•œë‹¤. 
     UINT32 IncrementBufferIndex();
     void ResetBufferIndex();
     void PushMsgQueue(LogMsg* logMsg);
@@ -79,17 +79,17 @@ private:
     std::recursive_mutex lock_;
     INT logInfoLevel_[MAX_STORAGE_TYPE];
     CHAR logFileName_[MAX_PATH];
-    FileLogType fileLogType_; //·Î±× ÆÄÀÏÀÇ Çü½Ä
+    FileLogType fileLogType_; //ë¡œê·¸ íŒŒì¼ì˜ í˜•ì‹
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
-    LogConfig logConfig_; // ·Î±× ÀúÀå º¯¼ö
-    HWND windowHandle_; // Window·Î ·Î±×¸¦ ³²±æ À©µµ¿ì ÇÚµé
-    HANDLE logFileHandle_; //File handleº¯¼ö
-    UINT32 fileCount_; //°ãÄ¡´Â ÆÄÀÏÀÌ ¾ø°Ô ÇÏ±â À§ÇØ¼­
+    LogConfig logConfig_; // ë¡œê·¸ ì €ì¥ ë³€ìˆ˜
+    HWND windowHandle_; // Windowë¡œ ë¡œê·¸ë¥¼ ë‚¨ê¸¸ ìœˆë„ìš° í•¸ë“¤
+    HANDLE logFileHandle_; //File handleë³€ìˆ˜
+    UINT32 fileCount_; //ê²¹ì¹˜ëŠ” íŒŒì¼ì´ ì—†ê²Œ í•˜ê¸° ìœ„í•´ì„œ
     BOOL isInit_;
-    LogQueue logQueue_; // ¸Ş¼¼Áö Å¥
-    INT msgBufferIndex_; //ÇöÀç ¸Ş¼¼Áö ¹öÆÛ À§Ä¡
+    LogQueue logQueue_; // ë©”ì„¸ì§€ í
+    INT msgBufferIndex_; //í˜„ì¬ ë©”ì„¸ì§€ ë²„í¼ ìœ„ì¹˜
     UINT32 fileMaxSize_;
-    struct tm logFileLocalTime; // ÇöÀç ·Î±× ÆÄÀÏÀÇ »ı¼º ½Ã°£
+    struct tm logFileLocalTime; // í˜„ì¬ ë¡œê·¸ íŒŒì¼ì˜ ìƒì„± ì‹œê°„
 };
 
 class LogManager : public LogManagerImpl, public Singleton<LogManager>

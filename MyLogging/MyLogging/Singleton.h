@@ -1,4 +1,4 @@
-#ifndef SINGLETON
+﻿#ifndef SINGLETON
 #define SINGLETON
 
 template <typename T>
