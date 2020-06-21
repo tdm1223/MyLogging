@@ -19,12 +19,11 @@ public:
     {
         return TRUE;
     }
-    virtual void Logging(CHAR* outputString, tm localTime, LogInfoType logInfo = LogInfoType::kNone) = 0;
+    virtual void Logging(CHAR* outputString, tm localTime, LoggingLevel logInfo = LoggingLevel::kNone) = 0;
     virtual void Close() {}
 
 protected:
     LogConfig logConfig_;
-    LogInfoType logInfo_;
 };
 
 class FileLogging : public LoggingInterface
@@ -32,9 +31,8 @@ class FileLogging : public LoggingInterface
 public:
     FileLogging(LogConfig& config)
     {
-        fileMaxSize_ = MAX_LOGFILE_SIZE;
-        fileLogType_ = FileLogType::kFileNone;
         ZeroMemory(logFileName_, MAX_PATH);
+        fileMaxSize_ = MAX_LOGFILE_SIZE;
         logConfig_ = config;
         logFileHandle_ = NULL;
         fileCount_ = 0;
@@ -67,31 +65,34 @@ public:
         return InitFile();
     }
 
-    void Logging(CHAR* loggingString, tm localTime, LogInfoType logInfo)
+    void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
         if (logFileHandle_ == nullptr)
         {
             return;
         }
 
-        DWORD writtenBytes = 0;
-        UINT32 curFileSize = GetFileSize(logFileHandle_, NULL);
-        // 파일 용량이 지정한 크기를 초과헀거나 날짜가 다르다면 새로 만든다.
-        if (curFileSize > fileMaxSize_ || localTime.tm_mday != logFileLocalTime_.tm_mday)
+        // 현재 로깅수준이 인자로 들어온거보다 높으면 로깅
+        if (logConfig_.minLoggingLevel[kFile] <= logInfo)
         {
-            CloseHandle(logFileHandle_);
-            logFileHandle_ = NULL;
-            InitFile();
-        }
+            DWORD writtenBytes = 0;
+            UINT32 curFileSize = GetFileSize(logFileHandle_, NULL);
+            // 파일 용량이 지정한 크기를 초과헀거나 날짜가 다르다면 새로 만든다.
+            if (curFileSize > fileMaxSize_ || localTime.tm_mday != logFileLocalTime_.tm_mday)
+            {
+                CloseHandle(logFileHandle_);
+                logFileHandle_ = NULL;
+                InitFile();
+            }
 
-        // 파일 끝으로 파일 포인터를 옮긴다. 
-        SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
-        WriteFile(logFileHandle_, loggingString, (UINT32)strlen(loggingString), &writtenBytes, NULL);
+            // 파일 끝으로 파일 포인터를 옮긴다. 
+            SetFilePointer(logFileHandle_, 0, nullptr, FILE_END);
+            WriteFile(logFileHandle_, loggingString, (UINT32)strlen(loggingString), &writtenBytes, NULL);
+        }
     }
 
     void Close()
     {
-        fileLogType_ = FileLogType::kFileNone;
         //파일 로그를 끝낸다.
         if (logFileHandle_)
         {
@@ -101,7 +102,6 @@ public:
     }
 
 private:
-    FileLogType fileLogType_;       // 파일의 형식
     struct tm logFileLocalTime_;    // 파일 생성 시간
     CHAR logFileName_[MAX_PATH];    // 파일 이름
     UINT32 fileCount_;              // 겹치는 파일이 없게 하기 위한 파일 카운트
@@ -116,9 +116,12 @@ public:
     {
         logConfig_ = config;
     }
-    void Logging(CHAR* loggingString, tm localTime, LogInfoType logInfo)
+    void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        printf("[%d] - %s", logInfo, loggingString);
+        if (logConfig_.minLoggingLevel[kConsole] <= logInfo)
+        {
+            printf("[%d] - %s", logInfo, loggingString);
+        }
     }
 };
 
@@ -129,9 +132,12 @@ public:
     {
         logConfig_ = config;
     }
-    void Logging(CHAR* loggingString, tm localTime, LogInfoType logInfo)
+    void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        OutputDebugStringA(loggingString);
+        if (logConfig_.minLoggingLevel[kDebugView] <= logInfo)
+        {
+            OutputDebugStringA(loggingString);
+        }
     }
 };
 
@@ -142,11 +148,11 @@ public:
     virtual ~LogManager();
     static BOOL INIT_LOG(LogConfig& logConfig);
     static void CLOSE_LOG();
-    static void LOG(LogInfoType logInfoType, const std::string outputString, ...);
+    static void LOG(LoggingLevel logInfoType, const std::string outputString, ...);
 
     //인터페이스 함수
     BOOL Init(LogConfig& logConfig);
-    void LogOutput(LogInfoType logInfo, CHAR* outputString);
+    void LogOutput(LoggingLevel logInfo, CHAR* outputString);
     void CloseAllLog();
 
     // 윈도우 창 로그를 끝낸다.

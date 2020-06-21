@@ -25,14 +25,17 @@ void LogManager::CLOSE_LOG()
     LogManager::GetInstance()->CloseAllLog();
 }
 
-void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ...)
+void LogManager::LOG(LoggingLevel logInfoType, const std::string outputString, ...)
 {
     LogMsg* log = new LogMsg;
+    log->logType = logInfoType; // 로그 종류 설정
+
+    // 로그 스트링 설정
     va_list	argptr;
     va_start(argptr, outputString);
     _vsnprintf_s(log->outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
     va_end(argptr);
-    log->logType = logInfoType;
+    
     LogManager::GetInstance()->PushMsgQueue(log);
 }
 
@@ -42,19 +45,21 @@ BOOL LogManager::Init(LogConfig& logConfig)
     CloseAllLog();
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
-    logInfoLevel_ = logConfig.logTypes;
+    logInfoLevel_ = logConfig.minLoggingLevel;
 
-    // 파일   로그를 설정했다면
+    // 파일 로그 설정
     if (logInfoLevel_[kFile] != kNone)
     {
         loggingList_.push_back(new FileLogging(logConfig));
     }
 
+    // 콘솔 로그 설정
     if (logInfoLevel_[kConsole] != kNone)
     {
         loggingList_.push_back(new ConsoleLogging(logConfig));
     }
 
+    // 디버그 로그 설정
     if (logInfoLevel_[kDebugView] != kNone)
     {
         loggingList_.push_back(new DebugLogging(logConfig));
@@ -71,7 +76,7 @@ BOOL LogManager::Init(LogConfig& logConfig)
     return TRUE;
 }
 
-void LogManager::LogOutput(LogInfoType logInfo, CHAR* outputString)
+void LogManager::LogOutput(LoggingLevel logInfo, CHAR* outputString)
 {
     if (isInit_ == FALSE)
     {
@@ -79,18 +84,20 @@ void LogManager::LogOutput(LogInfoType logInfo, CHAR* outputString)
     }
 
     //저장 타입에 해당하는 로그 레벨을 가져온다.
-    INT logLevel = (INT)logInfo;
+    INT loggingLevel = (INT)logInfo;
 
+    // 로그 시간 설정
     CHAR loggingTime[25];
     time_t curTime;
     curTime = time(NULL);
     struct tm localTime;
     localtime_s(&localTime, &curTime); // curTime을 localTime에 저장
     strftime(loggingTime, 25, "%Y/%m/%d(%H:%M:%S)", &localTime); // 구한 localTime의 형식 조절
-    outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
     loggingTime[24] = NULL;
 
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, "정보", logTypeString[logLevel].c_str(), outputString, 0x0d, 0x0a);
+    // 로그 스트링 설정
+    outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, "정보", loggingLevelString[loggingLevel].c_str(), outputString, 0x0d, 0x0a);
     
     for (auto log : loggingList_)
     {

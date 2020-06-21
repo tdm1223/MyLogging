@@ -5,9 +5,9 @@ int main()
 {
     LogConfig logConfig;
     strncpy_s(logConfig.logFileName, "Test", MAX_PATH);
-    logConfig.logTypes[LogType::kFile] = LogInfoType::kInfoNormal;
-    logConfig.logTypes[LogType::kDebugView] = LogInfoType::kInfoNormal;
-    logConfig.logTypes[LogType::kConsole] = LogInfoType::kInfoNormal;
+    logConfig.minLoggingLevel[LogType::kFile] = LoggingLevel::kInfoLow;      // file에는 Low 이상 출력
+    logConfig.minLoggingLevel[LogType::kDebugView] = LoggingLevel::kInfoNormal; // debugView에는 Normal 이상 출력
+    logConfig.minLoggingLevel[LogType::kConsole] = LoggingLevel::kInfoCritical; // console에는 Critical 이상 출력
 
     LogManager::INIT_LOG(logConfig);
 
