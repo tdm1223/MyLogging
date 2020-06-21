@@ -3,10 +3,15 @@
 
 LogManager::LogManager()
 {
+    ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
+    windowHandle_ = NULL;
+    isInit_ = FALSE;
 }
 
 LogManager::~LogManager()
 {
+    CloseAllLog();
+    DestroyThread();
 }
 
 BOOL LogManager::INIT_LOG(LogConfig& logConfig)
@@ -30,24 +35,10 @@ void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ..
     LogManager::GetInstance()->PushMsgQueue(log);
 }
 
-LogManagerImpl::LogManagerImpl()
-{
-    ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
-    windowHandle_ = NULL;
-    isInit_ = FALSE;
-}
-
-LogManagerImpl::~LogManagerImpl()
-{
-    CloseAllLog();
-    DestroyThread();
-}
-
-BOOL LogManagerImpl::Init(LogConfig& logConfig)
+BOOL LogManager::Init(LogConfig& logConfig)
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
     CloseAllLog();
-    CopyMemory(logInfoLevel_, logConfig.logInfoLevelByTypes, MAX_LOG_TYPE * sizeof(INT));
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
     
@@ -71,7 +62,7 @@ BOOL LogManagerImpl::Init(LogConfig& logConfig)
     return TRUE;
 }
 
-void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
+void LogManager::LogOutput(LogInfoType logInfo, CHAR* outputString)
 {
     if (isInit_ == FALSE)
     {
@@ -91,8 +82,8 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
     loggingTime[24] = NULL;
 
-    logInfoTypeTable[logStringIndex][99] = NULL;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, (logInfo >> 4) ? "에러" : "정보", logInfoTypeTable[logStringIndex], outputString, 0x0d, 0x0a);
+    logInfoTable[99] = "";
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, (logInfo >> 4) ? "에러" : "정보", logInfoTable[logStringIndex].c_str(), outputString, 0x0d, 0x0a);
     
     for (auto log : loggingList_)
     {
@@ -100,7 +91,7 @@ void LogManagerImpl::LogOutput(LogInfoType logInfo, CHAR* outputString)
     }
 }
 
-void LogManagerImpl::CloseAllLog()
+void LogManager::CloseAllLog()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
 
@@ -119,12 +110,12 @@ void LogManagerImpl::CloseAllLog()
     Stop();
 }
 
-void LogManagerImpl::CloseWindowLog()
+void LogManager::CloseWindowLog()
 {
     windowHandle_ = NULL;
 }
 
-void LogManagerImpl::OnProcess()
+void LogManager::OnProcess()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
     while (!logQueue_.IsEmpty())
@@ -140,7 +131,7 @@ void LogManagerImpl::OnProcess()
     }
 }
 
-void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)
+void LogManager::PushMsgQueue(LogMsg* logMsg)
 {
     logQueue_.Push(logMsg);
 }

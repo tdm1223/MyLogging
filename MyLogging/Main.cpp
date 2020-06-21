@@ -5,9 +5,6 @@ int main()
 {
     LogConfig logConfig;
     strncpy_s(logConfig.logFileName, "Test", MAX_PATH);
-    logConfig.logInfoLevelByTypes[kFile] = kInfoLow;
-    logConfig.logInfoLevelByTypes[kConsole] = kInfoLow;
-
     LogManager::INIT_LOG(logConfig);
 
     //while (1)

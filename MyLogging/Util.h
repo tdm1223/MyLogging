@@ -1,6 +1,7 @@
 ﻿#ifndef UTIL
 #define UTIL
 #include <Windows.h>
+#include <string>
 
 const INT MAX_LOG_TYPE  = 3;
 const INT MAX_OUTPUT_LENGTH = 1024 * 4;
@@ -40,7 +41,6 @@ struct LogMsg
 
 struct LogConfig
 {
-    INT logInfoLevelByTypes[MAX_LOG_TYPE];
     CHAR logFileName[MAX_PATH];
 
     FileLogType fileLogType;    // 로그 파일 형식
@@ -52,6 +52,15 @@ struct LogConfig
         ZeroMemory(this, sizeof(LogConfig));
         processTick = DEFAULT_TICK;
     }
+};
+
+static std::string logInfoTable[100] =
+{
+    "LOG_NONE",
+    "LOG_INFO_LOW",
+    "LOG_INFO_NORMAL",
+    "LOG_INFO_HIGH",
+    "LOG_INFO_CRITICAL",
 };
 
 #endif // !UTIL

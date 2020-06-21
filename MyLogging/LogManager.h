@@ -12,15 +12,6 @@
 #include "Util.h"
 #include <iostream>
 
-static CHAR logInfoTypeTable[][100] =
-{
-    "LOG_NONE",
-    "LOG_INFO_LOW",
-    "LOG_INFO_NORMAL",
-    "LOG_INFO_HIGH",
-    "LOG_INFO_CRITICAL",
-};
-
 class LoggingInterface
 {
 public:
@@ -32,7 +23,6 @@ public:
     virtual void Close() {}
 
 protected:
-    CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
     LogConfig logConfig_;
     LogInfoType logInfo_;
 };
@@ -145,12 +135,14 @@ public:
     }
 };
 
-// 실제 로그를 구현한 클래스
-class LogManagerImpl : public Thread
+class LogManager : public Thread, public Singleton<LogManager>
 {
 public:
-    LogManagerImpl();
-    virtual ~LogManagerImpl();
+    LogManager();
+    virtual ~LogManager();
+    static BOOL INIT_LOG(LogConfig& logConfig);
+    static void CLOSE_LOG();
+    static void LOG(LogInfoType logInfoType, const std::string outputString, ...);
 
     //인터페이스 함수
     BOOL Init(LogConfig& logConfig);
@@ -171,20 +163,10 @@ private:
     INT logInfoLevel_[MAX_LOG_TYPE];
     LogConfig logConfig_;                           // 로그 저장 변수
     HWND windowHandle_;                             // 로그를 남길 윈도우 핸들
-    BOOL isInit_;
     LogQueue logQueue_;                             // 메세지 큐
+    BOOL isInit_;
     std::vector<LoggingInterface*> loggingList_;
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
-};
-
-class LogManager : public LogManagerImpl, public Singleton<LogManager>
-{
-public:
-    LogManager();
-    virtual ~LogManager();
-    static BOOL INIT_LOG(LogConfig& logConfig);
-    static void CLOSE_LOG();
-    static void LOG(LogInfoType logInfoType, const std::string outputString, ...);
 };
 
 #endif
