@@ -35,7 +35,7 @@ void LogManager::LOG(LoggingLevel logInfoType, const std::string outputString, .
     va_start(argptr, outputString);
     _vsnprintf_s(log->outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
     va_end(argptr);
-    
+
     LogManager::GetInstance()->PushMsgQueue(log);
 }
 
@@ -45,7 +45,7 @@ BOOL LogManager::Init(LogConfig& logConfig)
     CloseAllLog();
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
-    logInfoLevel_ = logConfig.minLoggingLevel;
+    logInfoLevel_ = logConfig.maxLoggingLevel;
 
     // 파일 로그 설정
     if (logInfoLevel_[kFile] != kNone)
@@ -97,8 +97,8 @@ void LogManager::LogOutput(LoggingLevel logInfo, CHAR* outputString)
 
     // 로그 스트링 설정
     outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, "정보", loggingLevelString[loggingLevel].c_str(), outputString, 0x0d, 0x0a);
-    
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s\n", loggingTime, "정보", loggingLevelString[loggingLevel].c_str(), outputString);
+
     for (auto log : loggingList_)
     {
         log->Logging(outputString_, localTime, logInfo);
@@ -108,19 +108,13 @@ void LogManager::LogOutput(LoggingLevel logInfo, CHAR* outputString)
 void LogManager::CloseAllLog()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
-
-    //남아있는 로그를 모두 찍음
     OnProcess();
-
-    logInfoLevel_.resize(MAX_LOG_TYPE);
-
+    logInfoLevel_.resize(MAX_LOG_TYPE, 0);
     windowHandle_ = NULL;
-
     for (auto logging : loggingList_)
     {
         logging->Close();
     }
-
     //쓰레드 종료
     Stop();
 }
@@ -136,7 +130,7 @@ void LogManager::OnProcess()
     while (!logQueue_.IsEmpty())
     {
         LogMsg* logMsg = logQueue_.Front();
-        if (NULL == logMsg)
+        if (logMsg == NULL)
         {
             return;
         }

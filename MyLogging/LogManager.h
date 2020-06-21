@@ -48,9 +48,7 @@ public:
         CreateDirectory(L"../LOG", NULL);
         CHAR strtime[100];
         logFileLocalTime_ = loctime;
-
         strftime(strtime, 100, "%Y%m%d_01", &loctime);
-
         _snprintf_s(logFileName_, MAX_PATH * 2, "../Log/%s_%s_%02d.log", logConfig_.logFileName, strtime, ++fileCount_);
         logFileHandle_ = CreateFileA(logFileName_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         if (logFileHandle_ == NULL)
@@ -73,7 +71,7 @@ public:
         }
 
         // 현재 로깅수준이 인자로 들어온거보다 높으면 로깅
-        if (logConfig_.minLoggingLevel[kFile] <= logInfo)
+        if (logConfig_.maxLoggingLevel[kFile] >= logInfo)
         {
             DWORD writtenBytes = 0;
             UINT32 curFileSize = GetFileSize(logFileHandle_, NULL);
@@ -118,7 +116,7 @@ public:
     }
     void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        if (logConfig_.minLoggingLevel[kConsole] <= logInfo)
+        if (logConfig_.maxLoggingLevel[kConsole] >= logInfo)
         {
             printf("[%d] - %s", logInfo, loggingString);
         }
@@ -134,7 +132,7 @@ public:
     }
     void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        if (logConfig_.minLoggingLevel[kDebugView] <= logInfo)
+        if (logConfig_.maxLoggingLevel[kDebugView] >= logInfo)
         {
             OutputDebugStringA(loggingString);
         }

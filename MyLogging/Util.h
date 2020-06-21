@@ -33,14 +33,14 @@ struct LogMsg
 
 struct LogConfig
 {
-    std::vector<INT> minLoggingLevel;   // 최소 로깅 수준. LoggingLevel의 값을 할당하고 해당 값 이상의 수준만 로깅을 진행한다
+    std::vector<INT> maxLoggingLevel;   // 최소 로깅 수준. LoggingLevel의 값을 할당하고 해당 값 이상의 수준만 로깅을 진행한다
     CHAR logFileName[MAX_PATH];         // 로그 파일 명
     HWND hWnd;                          // 로그를 남길 윈도우 핸들
     UINT32 processTick;                 // Log 처리 시간 (기본 1초)
     LogConfig()
     {
         ZeroMemory(this, sizeof(LogConfig));
-        minLoggingLevel.assign(MAX_LOG_TYPE, 0);
+        maxLoggingLevel.assign(MAX_LOG_TYPE, 0);
         processTick = DEFAULT_TICK;
     }
 };
