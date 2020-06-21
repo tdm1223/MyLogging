@@ -46,3 +46,16 @@ void LogQueue::Clear()
         logQueue_.pop();
     }
 }
+
+BOOL LogQueue::IsEmpty()
+{
+    SpinLockGuard lock(lock_);
+    if (logQueue_.empty())
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}

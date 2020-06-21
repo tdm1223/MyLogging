@@ -6,7 +6,7 @@ const INT MAX_LOG_TYPE  = 3;
 const INT MAX_OUTPUT_LENGTH = 1024 * 4;
 const INT MAX_QUEUE_CNT     = 10000;
 const INT DEFAULT_TICK      = 1000;          // 로깅 갱신 시간
-const INT MAX_LOGFILE_SIZE  = 1024 * 100; // 로그 파일 크기
+const INT MAX_LOGFILE_SIZE  = 1024 * 200; // 로그 파일 크기
 const INT MAX_LOGTYPE       = 4;
 
 enum LogInfoType

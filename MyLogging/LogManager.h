@@ -145,9 +145,6 @@ public:
     }
 };
 
-// 글로벌 변수
-static LogMsg logMsg[MAX_QUEUE_CNT];
-
 // 실제 로그를 구현한 클래스
 class LogManagerImpl : public Thread
 {
@@ -167,20 +164,15 @@ public:
     virtual void OnProcess();
 
     // 큐 관련 함수
-    size_t GetQueueSize();
-    void InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outputString); //큐에 메세지를 추가한다. 
-    UINT32 IncrementBufferIndex();
-    void ResetBufferIndex();
     void PushMsgQueue(LogMsg* logMsg);
 
 private:
     std::recursive_mutex lock_;
     INT logInfoLevel_[MAX_LOG_TYPE];
-    LogConfig logConfig_; // 로그 저장 변수
-    HWND windowHandle_; // Window로 로그를 남길 윈도우 핸들
+    LogConfig logConfig_;                           // 로그 저장 변수
+    HWND windowHandle_;                             // 로그를 남길 윈도우 핸들
     BOOL isInit_;
-    LogQueue logQueue_; // 메세지 큐
-    INT msgBufferIndex_; //현재 메세지 버퍼 위치
+    LogQueue logQueue_;                             // 메세지 큐
     std::vector<LoggingInterface*> loggingList_;
     CHAR outputString_[MAX_OUTPUT_LENGTH * 2];
 };

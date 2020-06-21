@@ -21,41 +21,24 @@ void LogManager::CLOSE_LOG()
 
 void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ...)
 {
-    LONG queueCnt = 0;
-    do
-    {
-        queueCnt = LogManager::GetInstance()->IncrementBufferIndex();
-        // 현재 큐 Size를 초과하였다면 
-        if (queueCnt == MAX_QUEUE_CNT)
-        {
-            LogManager::GetInstance()->ResetBufferIndex();
-            queueCnt = 0;
-        }
-        else if (queueCnt > MAX_QUEUE_CNT)
-        {
-            Sleep(1);
-        }
-    } while (queueCnt >= MAX_QUEUE_CNT);
-
+    LogMsg* log = new LogMsg;
     va_list	argptr;
     va_start(argptr, outputString);
-    _vsnprintf_s(logMsg[queueCnt].outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
+    _vsnprintf_s(log->outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
     va_end(argptr);
-    logMsg[queueCnt].logMsgInfoType = logInfoType;
-    LogManager::GetInstance()->PushMsgQueue(&logMsg[queueCnt]);
+    log->logMsgInfoType = logInfoType;
+    LogManager::GetInstance()->PushMsgQueue(log);
 }
 
 LogManagerImpl::LogManagerImpl()
 {
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
     windowHandle_ = NULL;
-    msgBufferIndex_ = 0;
     isInit_ = FALSE;
 }
 
 LogManagerImpl::~LogManagerImpl()
 {
-    InsertMsgToQueue(kInfoNormal, "SYSTEM | cLogImpl::~cLogImpl() | cLogImpl 소멸자 호출");
     CloseAllLog();
     DestroyThread();
 }
@@ -126,7 +109,6 @@ void LogManagerImpl::CloseAllLog()
 
     ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
     windowHandle_ = NULL;
-    msgBufferIndex_ = 0;
 
     for (auto logging : loggingList_)
     {
@@ -145,8 +127,7 @@ void LogManagerImpl::CloseWindowLog()
 void LogManagerImpl::OnProcess()
 {
     std::lock_guard<std::recursive_mutex> lock(lock_);
-    size_t logCount = logQueue_.Size();
-    for (UINT32 i = 0; i < logCount; i++)
+    while (!logQueue_.IsEmpty())
     {
         LogMsg* logMsg = logQueue_.Front();
         if (NULL == logMsg)
@@ -157,37 +138,6 @@ void LogManagerImpl::OnProcess()
         LogOutput(logMsg->logMsgInfoType, logMsg->outputString);
         logQueue_.Pop();
     }
-}
-
-size_t LogManagerImpl::GetQueueSize()
-{
-    return logQueue_.Size();
-}
-
-void LogManagerImpl::InsertMsgToQueue(LogInfoType logInfoType, const CHAR* outputString)
-{
-    LONG queueCount = InterlockedIncrement((LONG*)&msgBufferIndex_);
-
-    //현재 큐 Size를 초과하였다면 
-    if (MAX_QUEUE_CNT == queueCount)
-    {
-        InterlockedExchange((LONG*)&msgBufferIndex_, 0);
-        queueCount = 0;
-    }
-
-    strncpy_s(logMsg[queueCount].outputString, outputString, MAX_OUTPUT_LENGTH);
-    logMsg[queueCount].logMsgInfoType = logInfoType;
-    logQueue_.Push(&logMsg[queueCount]);
-}
-
-UINT32 LogManagerImpl::IncrementBufferIndex()
-{
-    return InterlockedIncrement((LONG*)&msgBufferIndex_);
-}
-
-void LogManagerImpl::ResetBufferIndex()
-{
-    InterlockedExchange((LONG*)&msgBufferIndex_, 0);
 }
 
 void LogManagerImpl::PushMsgQueue(LogMsg* logMsg)

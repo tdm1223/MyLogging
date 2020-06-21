@@ -18,6 +18,7 @@ public:
     LogMsg* Front();
     SIZE_T Size();
     void Clear();
+    BOOL IsEmpty();
 
 private:
     SpinLock lock_;

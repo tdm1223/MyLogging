@@ -10,26 +10,28 @@ int main()
 
     LogManager::INIT_LOG(logConfig);
 
-    /*while (1)
-    {
-        int a;
-        std::cin >> a;
-        switch (a)
-        {
-        case kInfoLow:
-            LogManager::LOG(kInfoLow, "테스트1");
-            break;
-        case kInfoNormal:
-            LogManager::LOG(kInfoNormal, "테스트2");
-            break;
-        case kInfoHigh:
-            LogManager::LOG(kInfoHigh, "테스트3");
-            break;
-        case kInfoCritical:
-            LogManager::LOG(kInfoCritical, "테스트4");
-            break;
-        }
-    }*/
+    //while (1)
+    //{
+    //    int a;
+    //    std::cin >> a;
+    //    switch (a)
+    //    {
+    //    case kInfoLow:
+    //        LogManager::LOG(kInfoLow, "테스트1");
+    //        break;
+    //    case kInfoNormal:
+    //        LogManager::LOG(kInfoNormal, "테스트2");
+    //        break;
+    //    case kInfoHigh:
+    //        LogManager::LOG(kInfoHigh, "테스트3");
+    //        break;
+    //    case kInfoCritical:
+    //        LogManager::LOG(kInfoCritical, "테스트4");
+    //        break;
+    //    default:
+    //        break;
+    //    }
+    //}
 
     while (1)
     {
