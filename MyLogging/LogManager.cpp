@@ -3,7 +3,8 @@
 
 LogManager::LogManager()
 {
-    ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
+    ZeroMemory(outputString_, MAX_OUTPUT_LENGTH * 2 * sizeof(CHAR));
+    logInfoLevel_.resize(MAX_LOG_TYPE);
     windowHandle_ = NULL;
     isInit_ = FALSE;
 }
@@ -31,7 +32,7 @@ void LogManager::LOG(LogInfoType logInfoType, const std::string outputString, ..
     va_start(argptr, outputString);
     _vsnprintf_s(log->outputString, MAX_OUTPUT_LENGTH, outputString.c_str(), argptr);
     va_end(argptr);
-    log->logMsgInfoType = logInfoType;
+    log->logType = logInfoType;
     LogManager::GetInstance()->PushMsgQueue(log);
 }
 
@@ -41,15 +42,23 @@ BOOL LogManager::Init(LogConfig& logConfig)
     CloseAllLog();
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
-    
-    // 파일로그를 설정했다면
+    logInfoLevel_ = logConfig.logTypes;
+
+    // 파일   로그를 설정했다면
     if (logInfoLevel_[kFile] != kNone)
     {
         loggingList_.push_back(new FileLogging(logConfig));
     }
 
-    loggingList_.push_back(new ConsoleLogging(logConfig));
-    loggingList_.push_back(new DebugLogging(logConfig));
+    if (logInfoLevel_[kConsole] != kNone)
+    {
+        loggingList_.push_back(new ConsoleLogging(logConfig));
+    }
+
+    if (logInfoLevel_[kDebugView] != kNone)
+    {
+        loggingList_.push_back(new DebugLogging(logConfig));
+    }
 
     for (auto logging : loggingList_)
     {
@@ -68,10 +77,9 @@ void LogManager::LogOutput(LogInfoType logInfo, CHAR* outputString)
     {
         return;
     }
+
     //저장 타입에 해당하는 로그 레벨을 가져온다.
     INT logLevel = (INT)logInfo;
-    INT logStringIndex = logLevel;
-    INT* logLevelByTypes = logInfoLevel_;
 
     CHAR loggingTime[25];
     time_t curTime;
@@ -82,8 +90,7 @@ void LogManager::LogOutput(LogInfoType logInfo, CHAR* outputString)
     outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
     loggingTime[24] = NULL;
 
-    logInfoTable[99] = "";
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, (logInfo >> 4) ? "에러" : "정보", logInfoTable[logStringIndex].c_str(), outputString, 0x0d, 0x0a);
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s%c%c", loggingTime, "정보", logTypeString[logLevel].c_str(), outputString, 0x0d, 0x0a);
     
     for (auto log : loggingList_)
     {
@@ -98,7 +105,8 @@ void LogManager::CloseAllLog()
     //남아있는 로그를 모두 찍음
     OnProcess();
 
-    ZeroMemory(logInfoLevel_, MAX_LOG_TYPE * sizeof(INT));
+    logInfoLevel_.resize(MAX_LOG_TYPE);
+
     windowHandle_ = NULL;
 
     for (auto logging : loggingList_)
@@ -126,8 +134,9 @@ void LogManager::OnProcess()
             return;
         }
         //로그를 찍는다.
-        LogOutput(logMsg->logMsgInfoType, logMsg->outputString);
+        LogOutput(logMsg->logType, logMsg->outputString);
         logQueue_.Pop();
+        delete logMsg;
     }
 }
 

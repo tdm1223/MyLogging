@@ -5,6 +5,10 @@ int main()
 {
     LogConfig logConfig;
     strncpy_s(logConfig.logFileName, "Test", MAX_PATH);
+    logConfig.logTypes[LogType::kFile] = LogInfoType::kInfoNormal;
+    logConfig.logTypes[LogType::kDebugView] = LogInfoType::kInfoNormal;
+    logConfig.logTypes[LogType::kConsole] = LogInfoType::kInfoNormal;
+
     LogManager::INIT_LOG(logConfig);
 
     //while (1)

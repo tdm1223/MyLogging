@@ -160,7 +160,7 @@ public:
 
 private:
     std::recursive_mutex lock_;
-    INT logInfoLevel_[MAX_LOG_TYPE];
+    std::vector<INT> logInfoLevel_;
     LogConfig logConfig_;                           // 로그 저장 변수
     HWND windowHandle_;                             // 로그를 남길 윈도우 핸들
     LogQueue logQueue_;                             // 메세지 큐
