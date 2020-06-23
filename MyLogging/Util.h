@@ -40,7 +40,7 @@ struct LogConfig
     LogConfig()
     {
         ZeroMemory(this, sizeof(LogConfig));
-        maxLoggingLevel.assign(MAX_LOG_TYPE, 0);
+        maxLoggingLevel.resize(MAX_LOG_TYPE, 0);
         processTick = DEFAULT_TICK;
     }
 };
