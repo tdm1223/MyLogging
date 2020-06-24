@@ -17,12 +17,15 @@ class LoggingInterface
 public:
     virtual BOOL Init()
     {
+        isEnabled_ = TRUE;
         return TRUE;
     }
     virtual void Logging(CHAR* outputString, tm localTime, LoggingLevel logInfo = LoggingLevel::kNone) = 0;
     virtual void Close() {}
+    void SetEnable(BOOL enable);
 protected:
     LogConfig logConfig_;
+    BOOL isEnabled_ = FALSE;
 };
 
 class FileLogging : public LoggingInterface
@@ -59,6 +62,7 @@ public:
 
     BOOL Init()
     {
+        isEnabled_ = TRUE;
         return InitFile();
     }
 
@@ -70,7 +74,7 @@ public:
         }
 
         // 현재 로깅수준이 인자로 들어온거보다 높으면 로깅
-        if (logConfig_.maxLoggingLevel[kFile] >= logInfo)
+        if (logConfig_.maxLoggingLevel[kFile] >= logInfo && isEnabled_)
         {
             DWORD writtenBytes = 0;
             UINT32 curFileSize = GetFileSize(logFileHandle_, NULL);
@@ -115,7 +119,7 @@ public:
     }
     void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        if (logConfig_.maxLoggingLevel[kConsole] >= logInfo)
+        if (logConfig_.maxLoggingLevel[kConsole] >= logInfo && isEnabled_)
         {
             printf("[%d] - %s", logInfo, loggingString);
         }
@@ -131,7 +135,7 @@ public:
     }
     void Logging(CHAR* loggingString, tm localTime, LoggingLevel logInfo)
     {
-        if (logConfig_.maxLoggingLevel[kDebugView] >= logInfo)
+        if (logConfig_.maxLoggingLevel[kDebugView] >= logInfo && isEnabled_)
         {
             OutputDebugStringA(loggingString);
         }
@@ -145,13 +149,10 @@ public:
     virtual ~LogManager();
     static BOOL InitLog(LogConfig& logConfig);
     static void CloseLog();
-    static void LOG(LoggingLevel logInfoType, const std::string outputString, ...);
+    static void Log(LoggingLevel logInfoType, const std::string outputString, ...);
+    static void SetEnabled(LogType type, BOOL enable);
 
-    //인터페이스 함수
-    BOOL Init(LogConfig& logConfig);
-    void LogOutput(LoggingLevel logInfo, CHAR* outputString);
-    void CloseAllLog();
-
+private:
     // 윈도우 창 로그를 끝낸다.
     void CloseWindowLog();
 
@@ -161,7 +162,12 @@ public:
     // 큐 관련 함수
     void PushMsgQueue(LogMsg* logMsg);
 
-private:
+    // 내부 사용 함수
+    BOOL Init(LogConfig& logConfig);
+    void LogOutput(LoggingLevel logInfo, CHAR* outputString);
+    void CloseAllLog();
+    void SetEnable(LogType type, BOOL enable);
+
     std::recursive_mutex lock_;
     std::vector<INT> logInfoLevel_;
     LogConfig logConfig_;                           // 로그 저장 변수

@@ -25,7 +25,7 @@ void LogManager::CloseLog()
     LogManager::GetInstance()->CloseAllLog();
 }
 
-void LogManager::LOG(LoggingLevel logInfoType, const std::string outputString, ...)
+void LogManager::Log(LoggingLevel logInfoType, const std::string outputString, ...)
 {
     LogMsg* log = new LogMsg;
     log->logType = logInfoType; // 로그 종류 설정
@@ -37,6 +37,11 @@ void LogManager::LOG(LoggingLevel logInfoType, const std::string outputString, .
     va_end(argptr);
 
     LogManager::GetInstance()->PushMsgQueue(log);
+}
+
+void LogManager::SetEnabled(LogType type, BOOL enable)
+{
+    LogManager::GetInstance()->SetEnable(type, enable);
 }
 
 BOOL LogManager::Init(LogConfig& logConfig)
@@ -110,6 +115,11 @@ void LogManager::CloseAllLog()
     Stop();
 }
 
+void LogManager::SetEnable(LogType type, BOOL enable)
+{
+    loggingList_[type]->SetEnable(enable);
+}
+
 void LogManager::CloseWindowLog()
 {
     windowHandle_ = NULL;
@@ -135,4 +145,9 @@ void LogManager::OnProcess()
 void LogManager::PushMsgQueue(LogMsg* logMsg)
 {
     logQueue_.Push(logMsg);
+}
+
+void LoggingInterface::SetEnable(BOOL enable)
+{
+    isEnabled_ = enable;
 }
