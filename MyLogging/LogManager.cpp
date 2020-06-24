@@ -15,12 +15,12 @@ LogManager::~LogManager()
     DestroyThread();
 }
 
-BOOL LogManager::INIT_LOG(LogConfig& logConfig)
+BOOL LogManager::InitLog(LogConfig& logConfig)
 {
     return LogManager::GetInstance()->Init(logConfig);
 }
 
-void LogManager::CLOSE_LOG()
+void LogManager::CloseLog()
 {
     LogManager::GetInstance()->CloseAllLog();
 }
@@ -46,7 +46,7 @@ BOOL LogManager::Init(LogConfig& logConfig)
     logConfig_ = logConfig;
     windowHandle_ = logConfig.hWnd;
     logInfoLevel_ = logConfig.maxLoggingLevel;
-
+    loggingList_.clear();
     // 파일 로그 설정
     loggingList_.push_back(new FileLogging(logConfig));
 

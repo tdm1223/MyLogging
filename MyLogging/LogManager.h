@@ -21,7 +21,6 @@ public:
     }
     virtual void Logging(CHAR* outputString, tm localTime, LoggingLevel logInfo = LoggingLevel::kNone) = 0;
     virtual void Close() {}
-
 protected:
     LogConfig logConfig_;
 };
@@ -144,8 +143,8 @@ class LogManager : public Thread, public Singleton<LogManager>
 public:
     LogManager();
     virtual ~LogManager();
-    static BOOL INIT_LOG(LogConfig& logConfig);
-    static void CLOSE_LOG();
+    static BOOL InitLog(LogConfig& logConfig);
+    static void CloseLog();
     static void LOG(LoggingLevel logInfoType, const std::string outputString, ...);
 
     //인터페이스 함수
