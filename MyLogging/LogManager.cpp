@@ -48,22 +48,13 @@ BOOL LogManager::Init(LogConfig& logConfig)
     logInfoLevel_ = logConfig.maxLoggingLevel;
 
     // 파일 로그 설정
-    if (logInfoLevel_[kFile] != kNone)
-    {
-        loggingList_.push_back(new FileLogging(logConfig));
-    }
+    loggingList_.push_back(new FileLogging(logConfig));
 
     // 콘솔 로그 설정
-    if (logInfoLevel_[kConsole] != kNone)
-    {
-        loggingList_.push_back(new ConsoleLogging(logConfig));
-    }
+    loggingList_.push_back(new ConsoleLogging(logConfig));
 
     // 디버그 로그 설정
-    if (logInfoLevel_[kDebugView] != kNone)
-    {
-        loggingList_.push_back(new DebugLogging(logConfig));
-    }
+    loggingList_.push_back(new DebugLogging(logConfig));
 
     for (auto logging : loggingList_)
     {
@@ -97,7 +88,7 @@ void LogManager::LogOutput(LoggingLevel logInfo, CHAR* outputString)
 
     // 로그 스트링 설정
     outputString[MAX_OUTPUT_LENGTH - 1] = NULL;
-    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s | %s\n", loggingTime, "정보", loggingLevelString[loggingLevel].c_str(), outputString);
+    _snprintf_s(outputString_, MAX_OUTPUT_LENGTH * 2, "%s | %s | %s\n", loggingTime, loggingLevelString[loggingLevel].c_str(), outputString);
 
     for (auto log : loggingList_)
     {
